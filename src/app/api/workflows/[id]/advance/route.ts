@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { AREA_ORDER } from "@/lib/types";
+import { HUB_AREA, AREA_LABEL_MAP } from "@/lib/types";
 
 export async function POST(
   request: NextRequest,
@@ -9,7 +9,7 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { fields } = body;
+    const { targetArea, fields } = body;
 
     const workflow = await db.workflow.findUnique({ where: { id } });
     if (!workflow) {
@@ -20,52 +20,94 @@ export async function POST(
       return NextResponse.json({ error: "Workflow already completed" }, { status: 400 });
     }
 
-    const currentIndex = AREA_ORDER.indexOf(workflow.currentArea);
-    if (currentIndex >= AREA_ORDER.length - 1) {
-      return NextResponse.json({ error: "Already at the last area" }, { status: 400 });
+    const current = workflow.currentArea;
+    const completedAreas: string[] = JSON.parse(workflow.completedAreas || "[]");
+
+    // Dispatcher can only advance to Executive Accountant
+    if (current === "DISPATCHER" && targetArea !== "EXECUTIVE_ACCOUNTANT") {
+      return NextResponse.json(
+        { error: "Dispatcher solo puede enviar a Ejecutiva de Cuenta" },
+        { status: 400 }
+      );
     }
 
-    const nextArea = AREA_ORDER[currentIndex + 1];
+    // Dependencies can only return to Executive Accountant
+    const dependencyIds = ["FINANCE", "OPERATIONS", "LEGAL", "IT", "SUPPLY_CHAIN", "SERVICE_SUPPORT"];
+    if (dependencyIds.includes(current) && targetArea !== "EXECUTIVE_ACCOUNTANT") {
+      return NextResponse.json(
+        { error: "Las dependencias solo pueden devolver a Ejecutiva de Cuenta" },
+        { status: 400 }
+      );
+    }
+
+    // Only Executive Accountant can escalate to dependencies
+    if (current === "EXECUTIVE_ACCOUNTANT" && targetArea !== "EXECUTIVE_ACCOUNTANT" && !dependencyIds.includes(targetArea)) {
+      return NextResponse.json(
+        { error: "Área destino no válida" },
+        { status: 400 }
+      );
+    }
+
+    // When leaving an area (not hub), mark it as completed
+    if (dependencyIds.includes(current) && !completedAreas.includes(current)) {
+      completedAreas.push(current);
+    }
+
+    const action = current === "DISPATCHER"
+      ? "FORWARDED"
+      : current === "EXECUTIVE_ACCOUNTANT" && targetArea !== "EXECUTIVE_ACCOUNTANT"
+      ? "ESCALATED"
+      : "RETURNED";
+
+    const updateData: any = {
+      currentArea: targetArea,
+      completedAreas: JSON.stringify(completedAreas),
+    };
 
     if (fields) {
-      await db.workflow.update({
-        where: { id },
-        data: {
-          currentArea: nextArea,
-          fields: {
-            deleteMany: {},
-            create: fields.map((f: { label: string; value?: string; fieldType?: string; area?: string; required?: boolean; orderIndex?: number }, i: number) => ({
-              label: f.label,
-              value: f.value || "",
-              fieldType: f.fieldType || "text",
-              area: f.area || "DISPATCHER",
-              required: f.required || false,
-              orderIndex: f.orderIndex ?? i,
-            })),
-          },
-        },
-      });
-    } else {
-      await db.workflow.update({
-        where: { id },
-        data: { currentArea: nextArea },
-      });
+      updateData.fields = {
+        deleteMany: {},
+        create: fields.map((f: any, i: number) => ({
+          label: f.label,
+          value: f.value || "",
+          fieldType: f.fieldType || "text",
+          area: f.area || "DISPATCHER",
+          required: f.required || false,
+          orderIndex: f.orderIndex ?? i,
+        })),
+      };
     }
+
+    await db.workflow.update({ where: { id }, data: updateData });
 
     await db.areaLog.create({
       data: {
         workflowId: id,
-        fromArea: workflow.currentArea,
-        toArea: nextArea,
-        action: "ADVANCED",
+        fromArea: current,
+        toArea: targetArea,
+        action,
       },
     });
+
+    let notifMessage = "";
+    let notifType = "area_change";
+
+    if (action === "FORWARDED") {
+      notifMessage = `Dispatcher envió "${workflow.name}" a Ejecutiva de Cuenta para procesamiento.`;
+      notifType = "area_change";
+    } else if (action === "ESCALATED") {
+      notifMessage = `Ejecutiva de Cuenta escaló "${workflow.name}" a ${AREA_LABEL_MAP[targetArea]} por información faltante.`;
+      notifType = "escalation";
+    } else if (action === "RETURNED") {
+      notifMessage = `${AREA_LABEL_MAP[current]} devolvió "${workflow.name}" a Ejecutiva de Cuenta con información diligenciada.`;
+      notifType = "return";
+    }
 
     await db.notification.create({
       data: {
         workflowId: id,
-        message: `Flujo "${workflow.name}" avanzó de ${workflow.currentArea} a ${nextArea}.`,
-        type: "area_change",
+        message: notifMessage,
+        type: notifType,
       },
     });
 

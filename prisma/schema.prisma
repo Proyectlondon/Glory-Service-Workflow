@@ -8,14 +8,15 @@ datasource db {
 }
 
 model Workflow {
-  id              String   @id @default(cuid())
-  name            String
-  currentArea     String   @default("DISPATCHER")
-  status          String   @default("IN_PROGRESS")
-  documentData    String
-  documentName    String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default(cuid())
+  name              String
+  currentArea       String   @default("DISPATCHER")
+  status            String   @default("IN_PROGRESS")
+  documentData      String   @default("")
+  documentName      String
+  completedAreas    String   @default("[]")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   fields         WorkflowField[]
   notifications  Notification[]

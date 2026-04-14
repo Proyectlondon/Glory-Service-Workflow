@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore, Workflow } from "@/lib/store";
-import { AREA_LABEL_MAP, AREAS, AREA_ORDER } from "@/lib/types";
+import { AREA_LABEL_MAP, AREAS, HUB_AREA, DEPENDENCIES } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -13,9 +13,9 @@ import {
   Trash2,
   Bell,
   LayoutDashboard,
-  Upload,
   MoreHorizontal,
-  AlertCircle,
+  Mail,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,12 +58,9 @@ export function Dashboard() {
     setIsLoading(true);
     try {
       const res = await fetch("/api/workflows");
-      if (res.ok) {
-        const data = await res.json();
-        setWorkflows(data);
-      }
+      if (res.ok) setWorkflows(await res.json());
     } catch (e) {
-      console.error("Error fetching workflows:", e);
+      console.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -72,31 +69,22 @@ export function Dashboard() {
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch("/api/notifications");
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data);
-      }
+      if (res.ok) setNotifications(await res.json());
     } catch (e) {
-      console.error("Error fetching notifications:", e);
+      console.error(e);
     }
   }, [setNotifications]);
 
   useEffect(() => {
     fetchWorkflows();
     fetchNotifications();
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 15000);
+    const interval = setInterval(fetchNotifications, 15000);
     return () => clearInterval(interval);
   }, [fetchWorkflows, fetchNotifications]);
 
   const handleDeleteWorkflow = async (id: string) => {
-    try {
-      await fetch(`/api/workflows/${id}`, { method: "DELETE" });
-      setWorkflows(workflows.filter((w) => w.id !== id));
-    } catch (e) {
-      console.error("Error deleting workflow:", e);
-    }
+    await fetch(`/api/workflows/${id}`, { method: "DELETE" });
+    setWorkflows(workflows.filter((w) => w.id !== id));
   };
 
   const openWorkflow = (id: string) => {
@@ -107,148 +95,67 @@ export function Dashboard() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const filteredWorkflows = workflows.filter((w) => {
-    const matchesSearch =
-      w.name.toLowerCase().includes(search.toLowerCase()) ||
-      w.currentArea.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = filterStatus === "all" || w.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    const ms = w.name.toLowerCase().includes(search.toLowerCase()) || w.currentArea.toLowerCase().includes(search.toLowerCase());
+    const mf = filterStatus === "all" || w.status === filterStatus;
+    return ms && mf;
   });
 
-  const getWorkflowProgress = (workflow: Workflow) => {
-    const currentIdx = AREA_ORDER.indexOf(workflow.currentArea);
-    if (workflow.status === "COMPLETED") return 100;
-    return Math.round(((currentIdx + 1) / AREA_ORDER.length) * 100);
-  };
-
-  const getCurrentAreaBadgeColor = (areaId: string) => {
-    const area = AREAS.find((a) => a.id === areaId);
-    return area?.color || "bg-gray-500";
+  const completedDeps = (w: Workflow) => {
+    try { return JSON.parse(w.completedAreas || "[]") as string[]; } catch { return []; }
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Top Bar */}
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F5F7]">
+      {/* Header - Apple frosted glass */}
+      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
-            <img src="/glory-logo.png" alt="" className="h-8 w-8 rounded-lg" />
-            <div className="hidden sm:block">
-              <h1 className="text-base font-bold text-foreground">
-                Glory Service <span className="text-amber-500">Workflow</span>
-              </h1>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#007AFF] to-[#0055D4]">
+              <FileText className="h-4 w-4 text-white" />
             </div>
+            <h1 className="text-base font-semibold text-[#1D1D1F]">
+              Glory Service <span className="text-[#007AFF]">Workflow</span>
+            </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setCurrentView("notifications")}
-              className="relative"
+              className="relative rounded-full hover:bg-[#007AFF]/5"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-[18px] w-[18px] text-[#1D1D1F]" />
               {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#FF3B30] text-[10px] font-semibold text-white">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </Button>
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-bold">
-              GS
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#007AFF] to-[#5856D6] text-xs font-semibold text-white">
+              EC
             </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        {/* Stats Row */}
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            {
-              label: "Flujos Activos",
-              value: workflows.filter((w) => w.status === "IN_PROGRESS").length,
-              icon: Clock,
-              color: "text-blue-500",
-              bg: "bg-blue-500/10",
-            },
-            {
-              label: "Completados",
-              value: workflows.filter((w) => w.status === "COMPLETED").length,
-              icon: CheckCircle2,
-              color: "text-green-500",
-              bg: "bg-green-500/10",
-            },
-            {
-              label: "Total Flujos",
-              value: workflows.length,
-              icon: LayoutDashboard,
-              color: "text-purple-500",
-              bg: "bg-purple-500/10",
-            },
-            {
-              label: "Notificaciones",
-              value: unreadCount,
-              icon: Bell,
-              color: "text-amber-500",
-              bg: "bg-amber-500/10",
-            },
-          ].map((stat) => (
-            <Card key={stat.label} className="border-border/40">
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className={`rounded-lg p-2 ${stat.bg}`}>
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Actions */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-1 gap-2">
-            <div className="relative flex-1 sm:max-w-xs">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar flujos..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <div className="flex rounded-lg border border-border/60 bg-card p-0.5">
-              {(["all", "IN_PROGRESS", "COMPLETED"] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFilterStatus(f)}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    filterStatus === f
-                      ? "bg-foreground text-background"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {f === "all" ? "Todos" : f === "IN_PROGRESS" ? "En Progreso" : "Completados"}
-                </button>
-              ))}
-            </div>
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        {/* Title + Actions */}
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-[#1D1D1F]">Flujos de Trabajo</h2>
+            <p className="mt-1 text-sm text-[#86868B]">Gestiona y da seguimiento a todos tus formatos de servicio</p>
           </div>
           <div className="flex gap-2">
             <Dialog>
               <DialogTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-border/60"
-                >
-                  <FileText className="mr-2 h-4 w-4" />
+                <Button variant="outline" className="rounded-full border-black/10 bg-white text-[#1D1D1F] hover:bg-[#F5F5F7]">
+                  <Plus className="mr-1.5 h-4 w-4" />
                   Crear Manual
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md rounded-2xl border-black/5">
                 <DialogHeader>
-                  <DialogTitle>Crear Flujo Manualmente</DialogTitle>
+                  <DialogTitle className="text-lg text-[#1D1D1F]">Crear Flujo Manualmente</DialogTitle>
                 </DialogHeader>
                 <ManualCreateForm
                   onCreate={async (name, fields) => {
@@ -270,147 +177,156 @@ export function Dashboard() {
           </div>
         </div>
 
+        {/* Stats */}
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { label: "En Progreso", value: workflows.filter((w) => w.status === "IN_PROGRESS").length, icon: Clock, color: "#007AFF", bg: "#007AFF" },
+            { label: "Completados", value: workflows.filter((w) => w.status === "COMPLETED").length, icon: CheckCircle2, color: "#34C759", bg: "#34C759" },
+            { label: "Total", value: workflows.length, icon: LayoutDashboard, color: "#5856D6", bg: "#5856D6" },
+            { label: "Pendientes", value: unreadCount, icon: Bell, color: "#FF9500", bg: "#FF9500" },
+          ].map((stat) => (
+            <Card key={stat.label} className="rounded-2xl border-black/5 bg-white shadow-sm">
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${stat.bg}12` }}>
+                  <stat.icon className="h-5 w-5" style={{ color: stat.color }} />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-[#1D1D1F]">{stat.value}</p>
+                  <p className="text-xs text-[#86868B]">{stat.label}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Search + Filter */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1 sm:max-w-sm">
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#86868B]" />
+            <Input
+              placeholder="Buscar flujos..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-10 rounded-xl border-black/10 bg-white pl-10 text-sm placeholder:text-[#C7C7CC]"
+            />
+          </div>
+          <div className="flex gap-1 rounded-xl border border-black/5 bg-white p-1">
+            {(["all", "IN_PROGRESS", "COMPLETED"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilterStatus(f)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  filterStatus === f
+                    ? "bg-[#007AFF] text-white shadow-sm"
+                    : "text-[#86868B] hover:text-[#1D1D1F]"
+                }`}
+              >
+                {f === "all" ? "Todos" : f === "IN_PROGRESS" ? "Activos" : "Completados"}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Workflow List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#007AFF] border-t-transparent" />
           </div>
         ) : filteredWorkflows.length === 0 ? (
-          <Card className="border-border/40">
+          <Card className="rounded-2xl border-black/5 bg-white shadow-sm">
             <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-              <FileText className="mb-4 h-12 w-12 text-muted-foreground/30" />
-              <h3 className="text-lg font-semibold text-foreground">No hay flujos de trabajo</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Crea tu primer flujo subiendo un formato Word o creándolo manualmente.
-              </p>
+              <FileText className="mb-4 h-12 w-12 text-[#C7C7CC]" />
+              <h3 className="text-lg font-semibold text-[#1D1D1F]">Sin flujos de trabajo</h3>
+              <p className="mt-1 text-sm text-[#86868B]">Crea tu primer flujo subiendo un formato o manualmente.</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <AnimatePresence>
               {filteredWorkflows.map((workflow) => (
                 <motion.div
                   key={workflow.id}
                   layout
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
+                  exit={{ opacity: 0, y: -8 }}
                 >
                   <Card
-                    className="group cursor-pointer border-border/40 transition-all hover:border-amber-500/30 hover:shadow-lg"
+                    className="group cursor-pointer rounded-2xl border-black/5 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
                     onClick={() => openWorkflow(workflow.id)}
                   >
                     <CardContent className="p-5">
                       <div className="mb-3 flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="truncate font-semibold text-foreground">{workflow.name}</h4>
-                          <p className="mt-0.5 text-xs text-muted-foreground">
-                            {workflow.documentName}
-                          </p>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="truncate text-sm font-semibold text-[#1D1D1F]">{workflow.name}</h4>
+                          <p className="mt-0.5 truncate text-xs text-[#86868B]">{workflow.documentName}</p>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-7 w-7 rounded-full opacity-0 group-hover:opacity-100"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openWorkflow(workflow.id);
-                              }}
-                            >
-                              <FileText className="mr-2 h-4 w-4" />
-                              Ver Detalle
+                          <DropdownMenuContent align="end" className="rounded-xl">
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openWorkflow(workflow.id); }}>
+                              <FileText className="mr-2 h-4 w-4" />Ver Detalle
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(`/api/workflows/${workflow.id}/download`, "_blank");
-                              }}
-                            >
-                              <ArrowRight className="mr-2 h-4 w-4" />
-                              Descargar Word
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(`/api/workflows/${workflow.id}/download`, "_blank"); }}>
+                              <ArrowRight className="mr-2 h-4 w-4" />Descargar Word
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteWorkflow(workflow.id);
-                              }}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Eliminar
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDeleteWorkflow(workflow.id); }} className="text-[#FF3B30]">
+                              <Trash2 className="mr-2 h-4 w-4" />Eliminar
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
 
-                      <div className="mb-3">
-                        <div className="mb-1 flex items-center justify-between">
-                          <Badge
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {AREA_LABEL_MAP[workflow.currentArea] || workflow.currentArea}
+                      <div className="mb-2 flex items-center gap-2">
+                        <Badge
+                          className="rounded-full text-[11px] font-medium"
+                          style={{
+                            backgroundColor: `${AREAS.find((a) => a.id === workflow.currentArea)?.color}15`,
+                            color: AREAS.find((a) => a.id === workflow.currentArea)?.color,
+                          }}
+                        >
+                          {AREA_LABEL_MAP[workflow.currentArea]}
+                        </Badge>
+                        {workflow.status === "COMPLETED" && (
+                          <Badge className="rounded-full bg-[#34C759]/10 text-[#34C759] text-[11px]">
+                            Completado
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {getWorkflowProgress(workflow)}%
-                          </span>
-                        </div>
-                        <Progress value={getWorkflowProgress(workflow)} className="h-1.5" />
+                        )}
                       </div>
 
-                      {/* Area Progress Indicators */}
+                      {/* Dependency completion dots */}
                       <div className="flex items-center gap-1">
-                        {AREAS.map((area, idx) => {
-                          const areaIdx = AREA_ORDER.indexOf(area.id);
-                          const currentIdx = AREA_ORDER.indexOf(workflow.currentArea);
-                          const isCompleted = workflow.status === "COMPLETED" || areaIdx < currentIdx;
-                          const isCurrent = area.id === workflow.currentArea;
-                          const hasFields = workflow.fields?.some((f) => f.area === area.id);
-
+                        {DEPENDENCIES.map((dep) => {
+                          const cd = completedDeps(workflow);
+                          const hasFields = workflow.fields?.some((f) => f.area === dep.id);
+                          const isDone = cd.includes(dep.id);
                           return (
                             <div
-                              key={area.id}
-                              className={`h-2 flex-1 rounded-full transition-colors ${
-                                isCompleted
-                                  ? "bg-green-500"
-                                  : isCurrent
-                                  ? "bg-amber-500"
-                                  : hasFields
-                                  ? "bg-muted-foreground/20"
-                                  : "bg-border"
-                              }`}
-                              title={`${area.label} - ${isCompleted ? "Completado" : isCurrent ? "En curso" : "Pendiente"}`}
+                              key={dep.id}
+                              className="h-1.5 flex-1 rounded-full transition-colors"
+                              style={{
+                                backgroundColor: isDone ? dep.color : hasFields ? "#E5E5EA" : "#F5F5F7",
+                              }}
+                              title={`${dep.label} - ${isDone ? "Completado" : "Pendiente"}`}
                             />
                           );
                         })}
                       </div>
 
                       <div className="mt-3 flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">
-                          {workflow.fields?.length || 0} campos
-                        </p>
-                        <div className="flex items-center gap-1">
-                          {workflow.status === "COMPLETED" ? (
-                            <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">
-                              <CheckCircle2 className="mr-1 h-3 w-3" />
-                              Completado
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs">
-                              <Clock className="mr-1 h-3 w-3" />
-                              En Progreso
-                            </Badge>
-                          )}
-                        </div>
+                        <span className="text-[11px] text-[#86868B]">{workflow.fields?.length || 0} campos</span>
+                        <span className="text-[11px] text-[#86868B]">
+                          {new Date(workflow.updatedAt).toLocaleDateString("es-CO")}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
@@ -424,28 +340,26 @@ export function Dashboard() {
   );
 }
 
-function ManualCreateForm({
-  onCreate,
-}: {
-  onCreate: (name: string, fields: any[]) => void;
-}) {
+function ManualCreateForm({ onCreate }: { onCreate: (name: string, fields: any[]) => void }) {
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
 
   const defaultFields = [
     { label: "Nombre del Solicitante", value: "", fieldType: "text", area: "DISPATCHER", required: true },
-    { label: "Fecha de Solicitud", value: new Date().toISOString().split("T")[0], fieldType: "date", area: "DISPATCHER", required: true },
-    { label: "Descripción del Servicio", value: "", fieldType: "textarea", area: "DISPATCHER", required: true },
-    { label: "Prioridad", value: "", fieldType: "text", area: "DISPATCHER", required: false },
-    { label: "Ejecutivo Asignado", value: "", fieldType: "text", area: "SERVICE_EXECUTIVE", required: true },
-    { label: "Recursos Requeridos", value: "", fieldType: "textarea", area: "SERVICE_EXECUTIVE", required: false },
-    { label: "Costo Estimado", value: "", fieldType: "number", area: "ACCOUNTANT", required: true },
-    { label: "Centro de Costo", value: "", fieldType: "text", area: "ACCOUNTANT", required: false },
-    { label: "Viabilidad Técnica", value: "", fieldType: "textarea", area: "SERVICE_SUPPORT", required: true },
-    { label: "Fecha de Entrega", value: "", fieldType: "date", area: "SERVICE_SUPPORT", required: false },
+    { label: "Correo del Solicitante", value: "", fieldType: "text", area: "DISPATCHER", required: true },
+    { label: "Fecha de Recepción", value: new Date().toISOString().split("T")[0], fieldType: "date", area: "DISPATCHER", required: true },
+    { label: "Descripción del Servicio", value: "", fieldType: "textarea", area: "EXECUTIVE_ACCOUNTANT", required: true },
+    { label: "Cliente / Cuenta", value: "", fieldType: "text", area: "EXECUTIVE_ACCOUNTANT", required: true },
+    { label: "Prioridad", value: "", fieldType: "text", area: "EXECUTIVE_ACCOUNTANT", required: false },
+    { label: "Valor del Servicio", value: "", fieldType: "number", area: "EXECUTIVE_ACCOUNTANT", required: true },
+    { label: "Centro de Costo", value: "", fieldType: "text", area: "FINANCE", required: false },
+    { label: "Datos de Facturación", value: "", fieldType: "textarea", area: "FINANCE", required: false },
+    { label: "Requisitos Operativos", value: "", fieldType: "textarea", area: "OPERATIONS", required: false },
+    { label: "Fecha de Entrega", value: "", fieldType: "date", area: "OPERATIONS", required: false },
+    { label: "Revisión Legal", value: "", fieldType: "textarea", area: "LEGAL", required: false },
+    { label: "Recursos Técnicos", value: "", fieldType: "textarea", area: "IT", required: false },
     { label: "Proveedor Asignado", value: "", fieldType: "text", area: "SUPPLY_CHAIN", required: false },
-    { label: "Número de Orden", value: "", fieldType: "text", area: "SUPPLY_CHAIN", required: true },
-    { label: "Observaciones Finales", value: "", fieldType: "textarea", area: "SUPPLY_CHAIN", required: false },
+    { label: "Observaciones de Soporte", value: "", fieldType: "textarea", area: "SERVICE_SUPPORT", required: false },
   ];
 
   const handleCreate = async () => {
@@ -458,53 +372,26 @@ function ManualCreateForm({
   return (
     <div className="space-y-4 pt-2">
       <div>
-        <label className="text-sm font-medium text-foreground">Nombre del Flujo</label>
+        <label className="text-sm font-medium text-[#1D1D1F]">Nombre del Flujo</label>
         <Input
           placeholder="Ej: Solicitud de Servicio #001"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1"
+          className="mt-1.5 h-10 rounded-xl border-black/10"
         />
       </div>
-      <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
-        <p className="text-xs text-muted-foreground">
-          Se crearán <span className="font-medium text-foreground">13 campos predefinidos</span> distribuidos en las 5 áreas del flujo de servicio. Podrá editar, agregar o eliminar campos después de la creación.
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-md bg-blue-500/10 p-2 text-center">
-          <p className="text-xs font-medium text-blue-600">Dispatcher</p>
-          <p className="text-[10px] text-muted-foreground">4 campos</p>
-        </div>
-        <div className="rounded-md bg-purple-500/10 p-2 text-center">
-          <p className="text-xs font-medium text-purple-600">Service Executive</p>
-          <p className="text-[10px] text-muted-foreground">2 campos</p>
-        </div>
-        <div className="rounded-md bg-green-500/10 p-2 text-center">
-          <p className="text-xs font-medium text-green-600">Accountant</p>
-          <p className="text-[10px] text-muted-foreground">2 campos</p>
-        </div>
-        <div className="rounded-md bg-orange-500/10 p-2 text-center">
-          <p className="text-xs font-medium text-orange-600">Service Support</p>
-          <p className="text-[10px] text-muted-foreground">2 campos</p>
-        </div>
-        <div className="col-span-2 rounded-md bg-rose-500/10 p-2 text-center">
-          <p className="text-xs font-medium text-rose-600">Supply Chain</p>
-          <p className="text-[10px] text-muted-foreground">3 campos</p>
-        </div>
-      </div>
+      <p className="text-xs text-[#86868B]">
+        Se crearán <span className="font-medium text-[#1D1D1F]">15 campos</span> distribuidos entre Dispatcher, Ejecutiva de Cuenta y las dependencias.
+      </p>
       <Button
         onClick={handleCreate}
         disabled={!name.trim() || creating}
-        className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700"
+        className="w-full h-10 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066E0]"
       >
         {creating ? (
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
         ) : (
-          <>
-            <Plus className="mr-2 h-4 w-4" />
-            Crear Flujo
-          </>
+          <><Plus className="mr-1.5 h-4 w-4" />Crear Flujo</>
         )}
       </Button>
     </div>

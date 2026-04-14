@@ -21,6 +21,7 @@ export interface Workflow {
   status: string;
   documentName: string;
   documentData: string;
+  completedAreas: string;
   createdAt: string;
   updatedAt: string;
   fields: WorkflowField[];
@@ -67,8 +68,9 @@ interface AppState {
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
 
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
+  toast: { message: string; type: "success" | "error" | "info" } | null;
+  showToast: (message: string, type?: "success" | "error" | "info") => void;
+  clearToast: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -101,6 +103,7 @@ export const useAppStore = create<AppState>((set) => ({
   isLoading: false,
   setIsLoading: (loading) => set({ isLoading: loading }),
 
-  sidebarOpen: false,
-  setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  toast: null,
+  showToast: (message, type = "success") => set({ toast: { message, type } }),
+  clearToast: () => set({ toast: null }),
 }));

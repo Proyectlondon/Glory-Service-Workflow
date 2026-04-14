@@ -30,7 +30,7 @@ export async function GET(
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
     }
 
-    const areas = ["DISPATCHER", "SERVICE_EXECUTIVE", "ACCOUNTANT", "SERVICE_SUPPORT", "SUPPLY_CHAIN"];
+    const areas = ["DISPATCHER", "EXECUTIVE_ACCOUNTANT", "FINANCE", "OPERATIONS", "LEGAL", "IT", "SUPPLY_CHAIN", "SERVICE_SUPPORT"];
     const fieldsByArea = new Map<string, typeof workflow.fields>();
     for (const field of workflow.fields) {
       if (!fieldsByArea.has(field.area)) fieldsByArea.set(field.area, []);
@@ -62,7 +62,7 @@ export async function GET(
           new TextRun({
             text: `Formato de Servicio - Estado: ${workflow.status === "COMPLETED" ? "COMPLETADO" : "EN PROGRESO"}`,
             size: 22,
-            color: "666666",
+            color: "007AFF",
             font: "Calibri",
             italics: true,
           }),

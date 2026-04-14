@@ -1,156 +1,134 @@
 "use client";
 
 import { useAppStore } from "@/lib/store";
-import { AREAS, AREA_LABEL_MAP, AREA_ORDER } from "@/lib/types";
+import { AREAS, DEPENDENCIES } from "@/lib/types";
 import { motion } from "framer-motion";
 import {
   FileText,
   ArrowRight,
   CheckCircle2,
-  Clock,
   Bell,
   Zap,
   Shield,
   Users,
   ChevronRight,
+  Mail,
+  UserCheck,
+  DollarSign,
+  Settings,
+  Package,
+  Headphones,
+  Cpu,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function LandingPage() {
   const { setCurrentView } = useAppStore();
 
-  const areaColors = [
-    "from-blue-500/20 to-blue-600/5",
-    "from-purple-500/20 to-purple-600/5",
-    "from-green-500/20 to-green-600/5",
-    "from-orange-500/20 to-orange-600/5",
-    "from-rose-500/20 to-rose-600/5",
-  ];
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F5F7]">
+      {/* Header - Apple style frosted glass */}
+      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <img src="/glory-logo.png" alt="Glory Service Workflow" className="h-9 w-9 rounded-lg" />
-            <div>
-              <h1 className="text-lg font-bold tracking-tight text-foreground">
-                Glory Service <span className="text-amber-500">Workflow</span>
-              </h1>
-              <p className="hidden text-xs text-muted-foreground sm:block">Gestión inteligente de flujos de servicio</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#007AFF] to-[#0055D4] shadow-sm">
+              <FileText className="h-5 w-5 text-white" />
             </div>
+            <span className="text-lg font-semibold tracking-tight text-[#1D1D1F]">
+              Glory Service <span className="text-[#007AFF]">Workflow</span>
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentView("dashboard")}
-              className="hidden sm:inline-flex"
-            >
-              Iniciar Sesión
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setCurrentView("dashboard")}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-md"
-            >
-              Comenzar Ahora
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            onClick={() => setCurrentView("dashboard")}
+            className="rounded-full px-5 text-sm font-medium text-[#007AFF] hover:bg-[#007AFF]/5"
+          >
+            Open App
+          </Button>
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero - Clean Apple aesthetic */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/hero-bg.png" alt="" className="h-full w-full object-cover opacity-20" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
+          <img src="/hero-bg.png" alt="" className="h-full w-full object-cover opacity-60" />
         </div>
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-36">
+        <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-24 text-center sm:pt-32 sm:pb-32">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="mx-auto max-w-3xl text-center"
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-sm font-medium text-amber-600">
-              <Zap className="h-4 w-4" />
-              Plataforma MVP de productividad empresarial
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[#007AFF]/8 px-4 py-1.5 text-sm font-medium text-[#007AFF]">
+              <Zap className="h-3.5 w-3.5" />
+              MVP de Productividad Empresarial
             </div>
-            <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Transforma la gestión de{" "}
-              <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">
-                flujos de servicio
+            <h1 className="mx-auto max-w-3xl text-5xl font-bold leading-tight tracking-tight text-[#1D1D1F] sm:text-6xl lg:text-7xl">
+              Flujos de servicio,
+              <br />
+              <span className="bg-gradient-to-r from-[#007AFF] to-[#5856D6] bg-clip-text text-transparent">
+                simplificados.
               </span>
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-              Sube formatos en Word, edítalos colaborativamente entre áreas, y descarga documentos
-              completamente diligenciados. Automatiza notificaciones y elimina retrabajos.
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-[#86868B] sm:text-xl">
+              Sube formatos en Word, procesa la información entre áreas y descarga documentos
+              completamente diligenciados. Sin complicaciones.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
                 size="lg"
                 onClick={() => setCurrentView("dashboard")}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25 px-8 py-6 text-base"
+                className="rounded-full bg-[#007AFF] px-8 py-6 text-base font-medium text-white shadow-lg shadow-[#007AFF]/25 hover:bg-[#0066E0]"
               >
-                <FileText className="mr-2 h-5 w-5" />
-                Crear Flujo de Trabajo
+                Comenzar Ahora
+                <ChevronRight className="ml-1 h-5 w-5" />
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="border-border/60 px-8 py-6 text-base"
+                variant="ghost"
+                className="rounded-full px-8 py-6 text-base font-medium text-[#007AFF]"
               >
-                Ver Demo
+                Conocer más
               </Button>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* How it Works */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      {/* How it works - Clean steps */}
+      <section className="mx-auto max-w-5xl px-6 py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center"
+          className="mb-16 text-center"
         >
-          <h3 className="text-3xl font-bold text-foreground">Cómo Funciona</h3>
-          <p className="mt-3 text-muted-foreground">Cuatro pasos simples para automatizar tu flujo de trabajo</p>
+          <p className="text-sm font-medium uppercase tracking-wider text-[#007AFF]">Cómo funciona</p>
+          <h2 className="mt-2 text-4xl font-bold tracking-tight text-[#1D1D1F] sm:text-5xl">
+            Tres pasos. Cero complicaciones.
+          </h2>
         </motion.div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-3">
           {[
             {
-              icon: FileText,
-              title: "Sube tu Formato",
-              desc: "Carga cualquier formato en Word (.docx) y el sistema extrae automáticamente los campos.",
-              color: "text-blue-500",
-              bg: "bg-blue-500/10",
+              icon: Mail,
+              title: "Recibe y registra",
+              desc: "Dispatcher recibe el formato por correo, lo sube al sistema y lo envía a la Ejecutiva de Cuenta para su procesamiento.",
+              num: "01",
             },
             {
-              icon: Users,
-              title: "Flujo entre Áreas",
-              desc: "El formato pasa por Dispatcher, Service Executive, Accountant, Service Support y Supply Chain.",
-              color: "text-purple-500",
-              bg: "bg-purple-500/10",
-            },
-            {
-              icon: Bell,
-              title: "Notificaciones en Tiempo Real",
-              desc: "Cada área recibe alertas cuando le corresponde actuar y al guardar cambios.",
-              color: "text-amber-500",
-              bg: "bg-amber-500/10",
+              icon: UserCheck,
+              title: "Procesa y escala",
+              desc: "La Ejecutiva llena lo que puede. Si falta información, escala a las dependencias correspondientes con un clic.",
+              num: "02",
             },
             {
               icon: CheckCircle2,
-              title: "Descarga Completa",
-              desc: "Al completar el flujo, descarga el formato Word totalmente diligenciado por todas las áreas.",
-              color: "text-green-500",
-              bg: "bg-green-500/10",
+              title: "Completa y descarga",
+              desc: "Las dependencias devuelven la info. La Ejecutiva finaliza y descarga el Word completamente diligenciado.",
+              num: "03",
             },
           ].map((step, i) => (
             <motion.div
@@ -158,141 +136,260 @@ export function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="group relative rounded-xl border border-border/60 bg-card p-6 transition-all hover:border-amber-500/30 hover:shadow-lg"
+              transition={{ delay: i * 0.15 }}
+              className="group text-center"
             >
-              <div className={`mb-4 inline-flex rounded-lg p-3 ${step.bg}`}>
-                <step.icon className={`h-6 w-6 ${step.color}`} />
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-all group-hover:shadow-md group-hover:ring-[#007AFF]/20">
+                <step.icon className="h-7 w-7 text-[#007AFF]" />
               </div>
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/10 text-xs font-bold text-amber-600">
-                  {i + 1}
-                </span>
-                <h4 className="font-semibold text-foreground">{step.title}</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">{step.desc}</p>
+              <span className="text-xs font-bold text-[#007AFF]/60">{step.num}</span>
+              <h3 className="mt-1 text-lg font-semibold text-[#1D1D1F]">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[#86868B]">{step.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Areas Flow */}
-      <section className="border-y border-border/40 bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      {/* Hub & Spoke Visual */}
+      <section className="border-y border-black/5 bg-white">
+        <div className="mx-auto max-w-5xl px-6 py-24">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center"
+            className="mb-16 text-center"
           >
-            <h3 className="text-3xl font-bold text-foreground">Flujo de Áreas</h3>
-            <p className="mt-3 text-muted-foreground">
-              Cada formato recorre las 5 áreas clave para su diligenciamiento completo
+            <p className="text-sm font-medium uppercase tracking-wider text-[#007AFF]">Modelo de flujo</p>
+            <h2 className="mt-2 text-4xl font-bold tracking-tight text-[#1D1D1F]">
+              Hub & Spoke inteligente
+            </h2>
+            <p className="mx-auto mt-4 max-w-md text-[#86868B]">
+              La Ejecutiva de Cuenta es el centro. Escala a dependencias y recibe respuestas automáticamente.
             </p>
           </motion.div>
 
-          <div className="mt-12 flex flex-col items-center gap-4 lg:flex-row lg:justify-center lg:gap-2">
-            {AREAS.map((area, i) => (
-              <div key={area.id} className="flex items-center gap-2 lg:gap-2">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className={`flex flex-col items-center rounded-xl border border-border/60 bg-gradient-to-br ${areaColors[i]} p-5 backdrop-blur-sm transition-all hover:scale-105 hover:shadow-lg lg:min-w-[160px]`}
-                >
-                  <div className={`mb-2 rounded-full ${area.color} p-2.5`}>
-                    <Users className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">{area.label}</span>
-                  <span className="mt-1 text-center text-xs text-muted-foreground hidden lg:block">
-                    {area.description}
-                  </span>
-                </motion.div>
-                {i < AREAS.length - 1 && (
-                  <ArrowRight className="h-5 w-5 text-muted-foreground/50 hidden lg:block flex-shrink-0" />
-                )}
-                <ArrowRight className="h-5 w-5 text-muted-foreground/50 lg:hidden flex-shrink-0 rotate-90" />
+          {/* Visual hub-spoke diagram */}
+          <div className="relative mx-auto max-w-lg">
+            {/* Center - Executive Accountant */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              className="relative z-10 mx-auto flex flex-col items-center"
+            >
+              <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#007AFF] to-[#0055D4] shadow-xl shadow-[#007AFF]/20">
+                <UserCheck className="h-10 w-10 text-white" />
               </div>
-            ))}
+              <span className="mt-3 text-sm font-semibold text-[#1D1D1F]">Ejecutiva de Cuenta</span>
+              <span className="text-xs text-[#86868B]">Centro de operaciones</span>
+            </motion.div>
+
+            {/* Spokes - Dependencies in a circle */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative h-72 w-72">
+                {DEPENDENCIES.map((dep, i) => {
+                  const angle = (i / DEPENDENCIES.length) * 2 * Math.PI - Math.PI / 2;
+                  const x = Math.cos(angle) * 140;
+                  const y = Math.sin(angle) * 140;
+                  const Icon = { DollarSign, Settings, Shield, Cpu, Package, Headphones }[dep.icon as keyof typeof import("lucide-react")] || Settings;
+
+                  return (
+                    <motion.div
+                      key={dep.id}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                      style={{ transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))` }}
+                    >
+                      <div className="flex flex-col items-center gap-1">
+                        <div
+                          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-md ring-1 ring-black/5"
+                          style={{ boxShadow: `0 4px 12px ${dep.color}20` }}
+                        >
+                          <Icon className="h-5 w-5" style={{ color: dep.color }} />
+                        </div>
+                        <span className="text-[10px] font-medium text-[#86868B] text-center leading-tight w-20">
+                          {dep.label}
+                        </span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+
+                {/* Lines from center to dependencies */}
+                <svg className="absolute inset-0 h-full w-full" style={{ zIndex: -1 }}>
+                  {DEPENDENCIES.map((dep, i) => {
+                    const angle = (i / DEPENDENCIES.length) * 2 * Math.PI - Math.PI / 2;
+                    const x2 = 144 + Math.cos(angle) * 95;
+                    const y2 = 144 + Math.sin(angle) * 95;
+                    return (
+                      <line
+                        key={dep.id}
+                        x1="144"
+                        y1="144"
+                        x2={x2}
+                        y2={y2}
+                        stroke={dep.color}
+                        strokeWidth="1"
+                        strokeOpacity="0.3"
+                        strokeDasharray="4 4"
+                      />
+                    );
+                  })}
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Dispatcher → EA arrow */}
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <div className="flex items-center gap-2 rounded-xl bg-[#F5F5F7] px-4 py-2 ring-1 ring-black/5">
+              <Mail className="h-4 w-4 text-[#6B7280]" />
+              <span className="text-sm font-medium text-[#1D1D1F]">Dispatcher</span>
+            </div>
+            <ArrowRight className="h-4 w-4 text-[#007AFF]" />
+            <div className="flex items-center gap-2 rounded-xl bg-[#007AFF]/8 px-4 py-2 ring-1 ring-[#007AFF]/20">
+              <UserCheck className="h-4 w-4 text-[#007AFF]" />
+              <span className="text-sm font-medium text-[#007AFF]">Ejecutiva de Cuenta</span>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-center gap-4">
+            <div className="flex items-center gap-2 rounded-xl bg-[#007AFF]/8 px-4 py-2 ring-1 ring-[#007AFF]/20">
+              <UserCheck className="h-4 w-4 text-[#007AFF]" />
+              <span className="text-sm font-medium text-[#007AFF]">Ejecutiva</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <ArrowRight className="h-3.5 w-3.5 text-[#34C759]" />
+            </div>
+            <span className="text-xs text-[#86868B]">Escala</span>
+            <div className="flex items-center gap-1">
+              <ArrowRight className="h-3.5 w-3.5 text-[#34C759]" />
+            </div>
+            <span className="rounded-lg bg-[#34C759]/10 px-2 py-1 text-xs font-medium text-[#34C759]">Dependencia</span>
+            <div className="flex items-center gap-1">
+              <RotateCcw className="h-3.5 w-3.5 text-[#FF9500]" />
+            </div>
+            <span className="text-xs text-[#86868B]">Devuelve</span>
+            <div className="flex items-center gap-1">
+              <ArrowRight className="h-3.5 w-3.5 text-[#FF9500]" />
+            </div>
+            <div className="flex items-center gap-2 rounded-xl bg-[#007AFF]/8 px-4 py-2 ring-1 ring-[#007AFF]/20">
+              <UserCheck className="h-4 w-4 text-[#007AFF]" />
+              <span className="text-sm font-medium text-[#007AFF]">Ejecutiva</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2">
+      {/* Features - Apple Bento Grid style */}
+      <section className="mx-auto max-w-5xl px-6 py-24">
+        <div className="mb-16 text-center">
+          <p className="text-sm font-medium uppercase tracking-wider text-[#007AFF]">Características</p>
+          <h2 className="mt-2 text-4xl font-bold tracking-tight text-[#1D1D1F]">
+            Todo lo que necesitas.
+          </h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border border-border/60 bg-card p-8"
+            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
           >
-            <Shield className="mb-4 h-8 w-8 text-amber-500" />
-            <h4 className="mb-3 text-xl font-bold text-foreground">Control Total del Proceso</h4>
-            <p className="text-muted-foreground">
-              Supervisa en tiempo real el estado de cada formato. Sabrá exactamente en qué área se encuentra,
-              qué falta por diligenciar y cuándo se completará. El tablero de control centralizado le da
-              visibilidad completa de todos los flujos activos.
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#007AFF]/10">
+              <Shield className="h-5 w-5 text-[#007AFF]" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#1D1D1F]">Control total</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+              Supervisa en tiempo real cada formato. Sabrás en qué área está, qué falta por diligenciar y el historial completo de escalamientos.
             </p>
           </motion.div>
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-2xl border border-border/60 bg-card p-8"
+            transition={{ delay: 0.1 }}
+            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
           >
-            <Clock className="mb-4 h-8 w-8 text-amber-500" />
-            <h4 className="mb-3 text-xl font-bold text-foreground">Ahorro de Tiempo</h4>
-            <p className="text-muted-foreground">
-              Elimina la necesidad de enviar correos, imprimir documentos o hacer seguimiento manual.
-              Cada área recibe notificaciones automáticas y puede editar su parte directamente en el sistema,
-              reduciendo tiempos de respuesta hasta en un 70%.
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FF9500]/10">
+              <Zap className="h-5 w-5 text-[#FF9500]" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#1D1D1F]">Escalamiento inteligente</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+              La Ejecutiva escala a cualquier dependencia con un clic. Las dependencias devuelven automáticamente la información y ella continúa.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
+          >
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#34C759]/10">
+              <Bell className="h-5 w-5 text-[#34C759]" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#1D1D1F]">Notificaciones en tiempo real</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+              Alertas automáticas al escalar, recibir respuesta y completar. Nunca pierdes el rastro de ningún formato.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
+          >
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#AF52DE]/10">
+              <FileText className="h-5 w-5 text-[#AF52DE]" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#1D1D1F]">Word nativo</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+              Sube formatos .docx y descarga documentos profesionales completamente diligenciados con tablas por área y estado de cada campo.
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="border-t border-border/40">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mx-auto max-w-2xl rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 p-10 text-center"
+      <section className="mx-auto max-w-5xl px-6 py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-3xl bg-gradient-to-br from-[#007AFF] to-[#5856D6] p-12 text-center shadow-xl shadow-[#007AFF]/20 sm:p-16"
+        >
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">
+            Transforma tus flujos de servicio
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-base text-white/70">
+            Comienza ahora a gestionar formatos de manera inteligente, colaborativa y sin retrabajos.
+          </p>
+          <Button
+            size="lg"
+            onClick={() => setCurrentView("dashboard")}
+            className="mt-8 rounded-full bg-white px-8 py-6 text-base font-medium text-[#007AFF] shadow-lg hover:bg-white/90"
           >
-            <h3 className="text-3xl font-bold text-foreground">
-              ¿Listo para transformar tus flujos de servicio?
-            </h3>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Comience ahora mismo a gestionar sus formatos de manera inteligente y eficiente.
-            </p>
-            <Button
-              size="lg"
-              onClick={() => setCurrentView("dashboard")}
-              className="mt-8 bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25 px-10 py-6 text-base"
-            >
-              Comenzar Gratis
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-          </motion.div>
-        </div>
+            Comenzar Gratis
+            <ChevronRight className="ml-1 h-5 w-5" />
+          </Button>
+        </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <footer className="border-t border-black/5 bg-white">
+        <div className="mx-auto max-w-5xl px-6 py-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-center gap-2">
-              <img src="/glory-logo.png" alt="" className="h-6 w-6 rounded" />
-              <span className="text-sm font-semibold text-foreground">
-                Glory Service Workflow
-              </span>
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-[#007AFF] to-[#0055D4]">
+                <FileText className="h-3.5 w-3.5 text-white" />
+              </div>
+              <span className="text-sm font-medium text-[#1D1D1F]">Glory Service Workflow</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              MVP de productividad empresarial &copy; {new Date().getFullYear()}
-            </p>
+            <p className="text-xs text-[#86868B]">MVP de productividad empresarial &copy; {new Date().getFullYear()}</p>
           </div>
         </div>
       </footer>
