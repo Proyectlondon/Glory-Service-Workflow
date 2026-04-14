@@ -81,5 +81,5 @@ export const START_AREA = "DISPATCHER";
 export const DEPENDENCIES = AREAS.filter((a) => a.type === "dependency");
 
 export type WorkflowStatus = "IN_PROGRESS" | "COMPLETED";
-export type FieldType = "text" | "textarea" | "number" | "date" | "select";
+export type FieldType = "text" | "textarea" | "number" | "date" | "select" | "evidence";
 export type NotificationType = "area_change" | "escalation" | "return" | "save" | "complete" | "info";

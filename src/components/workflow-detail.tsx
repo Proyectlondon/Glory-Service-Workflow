@@ -26,6 +26,11 @@ import {
   Send,
   RotateCcw,
   ChevronDown,
+  ImagePlus,
+  FileUp,
+  X,
+  Eye,
+  Paperclip,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,12 +59,143 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Mail, UserCheck, DollarSign, Settings, Shield, Cpu, Package, Headphones,
 };
+
+/* ─── Evidence Upload Component ─── */
+function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled: boolean; onChange: (v: string) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  let evidence: { url: string; name: string; isImage: boolean } | null = null;
+  try {
+    if (value) evidence = JSON.parse(value);
+  } catch { /* */ }
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || disabled) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload-evidence", { method: "POST", body: fd });
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err.error || "Error al subir");
+        setUploading(false);
+        return;
+      }
+      const data = await res.json();
+      onChange(JSON.stringify({ url: data.url, name: data.originalName, isImage: data.isImage }));
+      toast.success("Evidencia adjuntada");
+    } catch {
+      toast.error("Error al subir evidencia");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const handleRemove = () => {
+    onChange("");
+    toast("Evidencia eliminada");
+  };
+
+  const formatSize = (url: string) => {
+    if (!url) return "";
+    const ext = url.split(".").pop()?.toLowerCase();
+    return ext ? ext.toUpperCase() : "";
+  };
+
+  if (evidence) {
+    return (
+      <div className="flex items-center gap-3">
+        {evidence.isImage ? (
+          <button
+            onClick={() => setPreviewOpen(true)}
+            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-black/10 bg-[#F5F5F7] transition-all hover:shadow-md"
+          >
+            <img src={evidence.url} alt={evidence.name} className="h-full w-full object-cover" suppressHydrationWarning />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/20">
+              <Eye className="h-4 w-4 text-white opacity-0 hover:opacity-100" />
+            </div>
+          </button>
+        ) : (
+          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border border-black/10 bg-[#F5F5F7]">
+            <Paperclip className="h-6 w-6 text-[#007AFF]" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="truncate text-xs font-medium text-[#1D1D1F]">{evidence.name}</p>
+          <Badge className="mt-0.5 rounded-full bg-[#007AFF]/8 text-[#007AFF] text-[10px]">
+            {formatSize(evidence.url)}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-1">
+          {!disabled && (
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-[#FF3B30] hover:bg-[#FF3B30]/8" onClick={handleRemove}>
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+
+        {/* Image Preview Dialog */}
+        {previewOpen && evidence.isImage && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setPreviewOpen(false)}>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="relative max-h-[85vh] max-w-[85vw] rounded-2xl bg-white p-2 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img src={evidence.url} alt={evidence.name} className="max-h-[80vh] max-w-[80vw] rounded-xl object-contain" suppressHydrationWarning />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-white shadow-md hover:bg-[#F5F5F7]"
+                onClick={() => setPreviewOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="absolute bottom-4 left-4 right-4 rounded-lg bg-black/50 px-3 py-1.5">
+                <p className="truncate text-xs text-white">{evidence.name}</p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <input ref={fileRef} type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onChange={handleUpload} className="hidden" disabled={disabled} />
+      <button
+        onClick={() => !disabled && fileRef.current?.click()}
+        disabled={disabled || uploading}
+        className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E5E5EA] bg-[#FAFAFA] px-4 py-4 text-sm transition-all ${
+          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:border-[#007AFF] hover:bg-[#007AFF]/4"
+        }`}
+      >
+        {uploading ? (
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#007AFF] border-t-transparent" />
+        ) : (
+          <>
+            <ImagePlus className="h-5 w-5 text-[#86868B]" />
+            <span className="text-[#86868B]">Subir foto o documento</span>
+          </>
+        )}
+      </button>
+      <p className="mt-1 text-center text-[10px] text-[#C7C7CC]">JPG, PNG, GIF, WebP, PDF, Word, Excel &middot; Máx. 10MB</p>
+    </div>
+  );
+}
 
 export function WorkflowDetail() {
   const { selectedWorkflowId, setCurrentView, updateWorkflowInList, isLoading, setIsLoading } = useAppStore();
@@ -357,7 +493,7 @@ export function WorkflowDetail() {
                         <DialogHeader><DialogTitle className="text-[#1D1D1F]">Agregar Campo</DialogTitle></DialogHeader>
                         <div className="space-y-3 pt-2">
                           <div><Label className="text-xs text-[#1D1D1F]">Nombre</Label><Input placeholder="Ej: Número de Referencia" value={newField.label} onChange={(e) => setNewField({ ...newField, label: e.target.value })} className="mt-1 rounded-xl border-black/10" /></div>
-                          <div><Label className="text-xs text-[#1D1D1F]">Tipo</Label><Select value={newField.fieldType} onValueChange={(v) => setNewField({ ...newField, fieldType: v })}><SelectTrigger className="mt-1 rounded-xl border-black/10"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl"><SelectItem value="text">Texto</SelectItem><SelectItem value="textarea">Texto largo</SelectItem><SelectItem value="number">Número</SelectItem><SelectItem value="date">Fecha</SelectItem></SelectContent></Select></div>
+                          <div><Label className="text-xs text-[#1D1D1F]">Tipo</Label><Select value={newField.fieldType} onValueChange={(v) => setNewField({ ...newField, fieldType: v })}><SelectTrigger className="mt-1 rounded-xl border-black/10"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl"><SelectItem value="text">Texto</SelectItem><SelectItem value="textarea">Texto largo</SelectItem><SelectItem value="number">Número</SelectItem><SelectItem value="date">Fecha</SelectItem><SelectItem value="evidence">Evidencia (foto/documento)</SelectItem></SelectContent></Select></div>
                           <div><Label className="text-xs text-[#1D1D1F]">Área</Label><Select value={newField.area} onValueChange={(v) => setNewField({ ...newField, area: v })}><SelectTrigger className="mt-1 rounded-xl border-black/10"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl">{AREAS.map((a) => <SelectItem key={a.id} value={a.id}>{a.label}</SelectItem>)}</SelectContent></Select></div>
                           <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={newField.required} onChange={(e) => setNewField({ ...newField, required: e.target.checked })} className="rounded" /><span className="text-xs text-[#1D1D1F]">Obligatorio</span></label>
                           <Button onClick={handleAddField} disabled={!newField.label.trim()} className="w-full h-10 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066E0]"><Plus className="mr-1.5 h-4 w-4" />Agregar</Button>
@@ -400,10 +536,17 @@ export function WorkflowDetail() {
                           <Input type="number" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="h-9 rounded-xl border-black/10 bg-white" />
                         ) : field.fieldType === "date" ? (
                           <Input type="date" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} className="h-9 rounded-xl border-black/10 bg-white" />
+                        ) : field.fieldType === "evidence" ? (
+                          <EvidenceUpload
+                            value={field.value}
+                            disabled={!canEdit}
+                            onChange={(v) => updateFieldValue(field.id, v)}
+                          />
                         ) : (
                           <Input value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="h-9 rounded-xl border-black/10 bg-white" />
                         )}
-                        {field.value?.trim() && <p className="mt-1.5 text-[10px] text-[#34C759] flex items-center gap-0.5"><CheckCircle2 className="h-3 w-3" />Diligenciado</p>}
+                        {field.fieldType !== "evidence" && field.value?.trim() && <p className="mt-1.5 text-[10px] text-[#34C759] flex items-center gap-0.5"><CheckCircle2 className="h-3 w-3" />Diligenciado</p>}
+                        {field.fieldType === "evidence" && field.value && <p className="mt-1.5 text-[10px] text-[#34C759] flex items-center gap-0.5"><CheckCircle2 className="h-3 w-3" />Evidencia adjunta</p>}
                       </motion.div>
                     ))}
                   </AnimatePresence>
