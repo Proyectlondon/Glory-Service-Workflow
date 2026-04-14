@@ -52,7 +52,7 @@ export function LandingPage() {
       {/* Hero - Clean Apple aesthetic */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/hero-bg.png" alt="" className="h-full w-full object-cover opacity-60" />
+          <img src="/hero-bg.png" alt="" className="h-full w-full object-cover opacity-40" />
         </div>
         <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-24 text-center sm:pt-32 sm:pb-32">
           <motion.div
@@ -169,7 +169,7 @@ export function LandingPage() {
           </motion.div>
 
           {/* Visual hub-spoke diagram */}
-          <div className="relative mx-auto max-w-lg">
+          <div className="relative mx-auto max-w-lg" style={{ minHeight: "340px" }}>
             {/* Center - Executive Accountant */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
