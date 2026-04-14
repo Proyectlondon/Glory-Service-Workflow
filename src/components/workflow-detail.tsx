@@ -263,8 +263,11 @@ export function WorkflowDetail() {
         setWorkflow(updated);
         updateWorkflowInList(updated);
         toast.success("Cambios guardados");
+      } else {
+        const err = await res.json().catch(() => ({ error: "Error desconocido" }));
+        toast.error(err.error || "Error al guardar");
       }
-    } catch { toast.error("Error al guardar"); }
+    } catch { toast.error("Error de conexión al guardar"); }
     finally { setSaving(false); }
   };
 
@@ -284,8 +287,11 @@ export function WorkflowDetail() {
         setActiveArea(updated.currentArea);
         const action = workflow.currentArea === "DISPATCHER" ? "enviado" : "escalado";
         toast.success(`Formato ${action} a ${AREA_LABEL_MAP[targetArea]}`);
+      } else {
+        const err = await res.json().catch(() => ({ error: "Error desconocido" }));
+        toast.error(err.error || "Error al avanzar el formato");
       }
-    } catch { toast.error("Error al avanzar"); }
+    } catch { toast.error("Error de conexión al avanzar"); }
     finally { setAdvancing(false); }
   };
 
@@ -303,8 +309,11 @@ export function WorkflowDetail() {
         setWorkflow(updated);
         updateWorkflowInList(updated);
         toast.success("Formato completado exitosamente");
+      } else {
+        const err = await res.json().catch(() => ({ error: "Error desconocido" }));
+        toast.error(err.error || "Error al completar");
       }
-    } catch { toast.error("Error al completar"); }
+    } catch { toast.error("Error de conexión al completar"); }
     finally { setCompleting(false); }
   };
 
