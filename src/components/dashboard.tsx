@@ -14,14 +14,14 @@ import {
   Bell,
   LayoutDashboard,
   MoreHorizontal,
-  Mail,
-  UserCheck,
+  LogOut,
+  User,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -33,13 +33,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { UploadZone } from "./upload-zone";
 
 export function Dashboard() {
   const {
+    user,
     workflows,
     setWorkflows,
     notifications,
@@ -49,10 +51,12 @@ export function Dashboard() {
     isLoading,
     setIsLoading,
     updateWorkflowInList,
+    logout,
   } = useAppStore();
 
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "IN_PROGRESS" | "COMPLETED">("all");
+  const [showMyPending, setShowMyPending] = useState(false);
 
   const fetchWorkflows = useCallback(async () => {
     setIsLoading(true);
@@ -94,7 +98,28 @@ export function Dashboard() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const filteredWorkflows = workflows.filter((w) => {
+  // Area filtering: admins see all, regular users see their area's workflows
+  const visibleWorkflows = useMemo(() => {
+    if (!user) return workflows;
+    if (user.role === "admin") return workflows;
+    // Show workflows where the user's area is the current area OR the user created it
+    return workflows.filter(
+      (w) =>
+        w.currentArea === user.area ||
+        w.createdBy === user.id ||
+        w.status === "COMPLETED"
+    );
+  }, [workflows, user]);
+
+  // My pending: workflows in the user's area that are in progress
+  const myPendingWorkflows = useMemo(() => {
+    if (!user) return [];
+    return workflows.filter(
+      (w) => w.currentArea === user.area && w.status === "IN_PROGRESS"
+    );
+  }, [workflows, user]);
+
+  const filteredWorkflows = (showMyPending ? myPendingWorkflows : visibleWorkflows).filter((w) => {
     const ms = w.name.toLowerCase().includes(search.toLowerCase()) || w.currentArea.toLowerCase().includes(search.toLowerCase());
     const mf = filterStatus === "all" || w.status === filterStatus;
     return ms && mf;
@@ -103,6 +128,17 @@ export function Dashboard() {
   const completedDeps = (w: Workflow) => {
     try { return JSON.parse(w.completedAreas || "[]") as string[]; } catch { return []; }
   };
+
+  const userInitials = user?.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "U";
+
+  const areaLabel = user ? AREA_LABEL_MAP[user.area] || user.area : "";
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
@@ -131,19 +167,62 @@ export function Dashboard() {
                 </span>
               )}
             </Button>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#007AFF] to-[#5856D6] text-xs font-semibold text-white">
-              EC
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-full p-1 transition-all hover:bg-black/5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#007AFF] to-[#5856D6] text-xs font-semibold text-white">
+                    {userInitials}
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-xl">
+                <div className="px-3 py-2">
+                  <p className="text-sm font-semibold text-[#1D1D1F]">{user?.name}</p>
+                  <p className="text-xs text-[#86868B]">{user?.email}</p>
+                </div>
+                <DropdownMenuSeparator />
+                <div className="px-3 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      className="rounded-full text-[10px] font-medium"
+                      style={{
+                        backgroundColor: `${AREAS.find((a) => a.id === user?.area)?.color}15`,
+                        color: AREAS.find((a) => a.id === user?.area)?.color,
+                      }}
+                    >
+                      {areaLabel}
+                    </Badge>
+                    {user?.role === "admin" && (
+                      <Badge className="rounded-full bg-[#5856D6]/10 text-[#5856D6] text-[10px]">
+                        <Shield className="mr-0.5 h-2.5 w-2.5" />
+                        Admin
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-[#FF3B30] cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Cerrar Sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-8">
-        {/* Title + Actions */}
+        {/* Welcome + Actions */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-[#1D1D1F]">Flujos de Trabajo</h2>
-            <p className="mt-1 text-sm text-[#86868B]">Gestiona y da seguimiento a todos tus formatos de servicio</p>
+            <h2 className="text-3xl font-bold tracking-tight text-[#1D1D1F]">
+              Flujos de Trabajo
+            </h2>
+            <p className="mt-1 text-sm text-[#86868B]">
+              {user?.role === "admin"
+                ? "Gestiona y da seguimiento a todos los flujos de servicio"
+                : `Gestionando flujos del área: ${areaLabel}`}
+            </p>
           </div>
           <div className="flex gap-2">
             <Dialog>
@@ -180,10 +259,10 @@ export function Dashboard() {
         {/* Stats */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "En Progreso", value: workflows.filter((w) => w.status === "IN_PROGRESS").length, icon: Clock, color: "#007AFF", bg: "#007AFF" },
-            { label: "Completados", value: workflows.filter((w) => w.status === "COMPLETED").length, icon: CheckCircle2, color: "#34C759", bg: "#34C759" },
-            { label: "Total", value: workflows.length, icon: LayoutDashboard, color: "#5856D6", bg: "#5856D6" },
-            { label: "Pendientes", value: unreadCount, icon: Bell, color: "#FF9500", bg: "#FF9500" },
+            { label: "En Progreso", value: visibleWorkflows.filter((w) => w.status === "IN_PROGRESS").length, icon: Clock, color: "#007AFF", bg: "#007AFF" },
+            { label: "Completados", value: visibleWorkflows.filter((w) => w.status === "COMPLETED").length, icon: CheckCircle2, color: "#34C759", bg: "#34C759" },
+            { label: "Total", value: visibleWorkflows.length, icon: LayoutDashboard, color: "#5856D6", bg: "#5856D6" },
+            { label: "Mis Pendientes", value: myPendingWorkflows.length, icon: Bell, color: "#FF9500", bg: "#FF9500" },
           ].map((stat) => (
             <Card key={stat.label} className="rounded-2xl border-black/5 bg-white shadow-sm">
               <CardContent className="flex items-center gap-3 p-4">
@@ -198,6 +277,52 @@ export function Dashboard() {
             </Card>
           ))}
         </div>
+
+        {/* My Pending Section (for non-admin users) */}
+        {user?.role !== "admin" && myPendingWorkflows.length > 0 && (
+          <div className="mb-8">
+            <div className="mb-4 flex items-center gap-3">
+              <h3 className="text-lg font-semibold text-[#1D1D1F]">Mis Pendientes</h3>
+              <Badge className="rounded-full bg-[#FF9500]/10 text-[#FF9500] text-xs">
+                {myPendingWorkflows.length} en tu área
+              </Badge>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {myPendingWorkflows.slice(0, 3).map((workflow) => (
+                <Card
+                  key={workflow.id}
+                  className="group cursor-pointer rounded-2xl border-[#FF9500]/20 bg-gradient-to-br from-white to-[#FF9500]/3 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+                  onClick={() => openWorkflow(workflow.id)}
+                >
+                  <CardContent className="p-5">
+                    <div className="mb-3 flex items-start justify-between">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="truncate text-sm font-semibold text-[#1D1D1F]">{workflow.name}</h4>
+                        <p className="mt-0.5 truncate text-xs text-[#86868B]">{workflow.documentName}</p>
+                      </div>
+                    </div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge
+                        className="rounded-full text-[11px] font-medium"
+                        style={{
+                          backgroundColor: `${AREAS.find((a) => a.id === workflow.currentArea)?.color}15`,
+                          color: AREAS.find((a) => a.id === workflow.currentArea)?.color,
+                        }}
+                      >
+                        {AREA_LABEL_MAP[workflow.currentArea]}
+                      </Badge>
+                      <span className="text-[10px] text-[#FF9500] font-medium">Requiere tu atención</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-[#86868B]">{workflow.fields?.length || 0} campos</span>
+                      <ArrowRight className="h-3.5 w-3.5 text-[#FF9500]" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Search + Filter */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -225,6 +350,18 @@ export function Dashboard() {
               </button>
             ))}
           </div>
+          {user?.role !== "admin" && (
+            <button
+              onClick={() => setShowMyPending(!showMyPending)}
+              className={`rounded-xl border px-3 py-1.5 text-xs font-medium transition-all ${
+                showMyPending
+                  ? "border-[#FF9500] bg-[#FF9500]/10 text-[#FF9500]"
+                  : "border-black/5 bg-white text-[#86868B] hover:text-[#1D1D1F]"
+              }`}
+            >
+              {showMyPending ? "Ver Todos" : "Mis Pendientes"}
+            </button>
+          )}
         </div>
 
         {/* Workflow List */}
@@ -299,6 +436,11 @@ export function Dashboard() {
                         {workflow.status === "COMPLETED" && (
                           <Badge className="rounded-full bg-[#34C759]/10 text-[#34C759] text-[11px]">
                             Completado
+                          </Badge>
+                        )}
+                        {workflow.currentArea === user?.area && workflow.status === "IN_PROGRESS" && (
+                          <Badge className="rounded-full bg-[#FF9500]/10 text-[#FF9500] text-[11px]">
+                            Tu área
                           </Badge>
                         )}
                       </div>

@@ -24,6 +24,8 @@ export interface Workflow {
   completedAreas: string;
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
   fields: WorkflowField[];
   notifications?: AppNotification[];
   areaLogs?: AreaLog[];
@@ -49,7 +51,28 @@ export interface AreaLog {
   createdAt: string;
 }
 
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  area: string;
+  role: string;
+  avatar: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface AppState {
+  // Auth
+  user: AuthUser | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  setUser: (user: AuthUser | null) => void;
+  setToken: (token: string | null) => void;
+  logout: () => void;
+
+  // Navigation
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
 
@@ -73,8 +96,21 @@ interface AppState {
   clearToast: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  currentView: "landing",
+export const useAppStore = create<AppState>((set, get) => ({
+  // Auth
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  setUser: (user) => set({ user, isAuthenticated: !!user }),
+  setToken: (token) => set({ token }),
+  logout: () => {
+    localStorage.removeItem("glory-token");
+    localStorage.removeItem("glory-user");
+    set({ user: null, token: null, isAuthenticated: false, currentView: "dashboard" });
+  },
+
+  // Navigation
+  currentView: "dashboard",
   setCurrentView: (view) => set({ currentView: view }),
 
   selectedWorkflowId: null,
@@ -107,3 +143,41 @@ export const useAppStore = create<AppState>((set) => ({
   showToast: (message, type = "success") => set({ toast: { message, type } }),
   clearToast: () => set({ toast: null }),
 }));
+
+// Initialize auth from localStorage
+if (typeof window !== "undefined") {
+  const savedToken = localStorage.getItem("glory-token");
+  const savedUser = localStorage.getItem("glory-user");
+
+  if (savedToken && savedUser) {
+    try {
+      const parsedUser = JSON.parse(savedUser);
+      useAppStore.setState({
+        user: parsedUser,
+        token: savedToken,
+        isAuthenticated: true,
+      });
+
+      // Validate token with server
+      fetch("/api/auth/me", {
+        headers: { Authorization: `Bearer ${savedToken}` },
+      })
+        .then((res) => {
+          if (res.ok) return res.json();
+          throw new Error("Invalid token");
+        })
+        .then((user) => {
+          useAppStore.setState({ user });
+          localStorage.setItem("glory-user", JSON.stringify(user));
+        })
+        .catch(() => {
+          localStorage.removeItem("glory-token");
+          localStorage.removeItem("glory-user");
+          useAppStore.setState({ user: null, token: null, isAuthenticated: false });
+        });
+    } catch {
+      localStorage.removeItem("glory-token");
+      localStorage.removeItem("glory-user");
+    }
+  }
+}

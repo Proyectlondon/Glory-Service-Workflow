@@ -198,7 +198,7 @@ function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled
 }
 
 export function WorkflowDetail() {
-  const { selectedWorkflowId, setCurrentView, updateWorkflowInList, isLoading, setIsLoading } = useAppStore();
+  const { selectedWorkflowId, setCurrentView, updateWorkflowInList, isLoading, setIsLoading, user } = useAppStore();
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const [activeArea, setActiveArea] = useState<string>("");
   const [saving, setSaving] = useState(false);
@@ -243,6 +243,12 @@ export function WorkflowDetail() {
   const isCurrent = (areaId: string) => workflow?.currentArea === areaId;
   const isHub = activeArea === HUB_AREA;
   const isDispatcher = activeArea === "DISPATCHER";
+
+  // Area-based edit permissions: admin can always edit, regular users only when area matches
+  const canEdit = workflow
+    ? workflow.status === "IN_PROGRESS" &&
+      (user?.role === "admin" || activeArea === workflow.currentArea)
+    : false;
 
   const updateFieldValue = (fieldId: string, value: string) => {
     if (!workflow) return;
@@ -362,7 +368,13 @@ export function WorkflowDetail() {
   const areaFields = getAreaFields(activeArea);
   const currentAreaInfo = AREAS.find((a) => a.id === workflow.currentArea);
   const completedAreas = getCompletedAreas();
-  const canEdit = workflow.status === "IN_PROGRESS" && activeArea === workflow.currentArea;
+
+  // Check if user can advance from the current area
+  const canAdvance = canEdit && (
+    workflow.currentArea === "DISPATCHER" ||
+    workflow.currentArea === HUB_AREA ||
+    DEPENDENCIES.some((d) => d.id === workflow.currentArea)
+  );
 
   return (
     <div className="min-h-screen bg-[#F5F5F7]">
@@ -415,12 +427,12 @@ export function WorkflowDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {workflow.currentArea === "DISPATCHER" && workflow.status === "IN_PROGRESS" && (
+              {canAdvance && workflow.currentArea === "DISPATCHER" && workflow.status === "IN_PROGRESS" && (
                 <Button size="sm" onClick={() => handleAdvance("EXECUTIVE_ACCOUNTANT")} disabled={advancing} className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066E0] shadow-sm shadow-[#007AFF]/20">
                   {advancing ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <><Send className="mr-1 h-3.5 w-3.5" />Enviar a Ejecutiva</>}
                 </Button>
               )}
-              {workflow.currentArea === HUB_AREA && workflow.status === "IN_PROGRESS" && (
+              {canAdvance && workflow.currentArea === HUB_AREA && workflow.status === "IN_PROGRESS" && (
                 <DropdownMenu open={escalateMenuOpen} onOpenChange={setEscalateMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button size="sm" disabled={advancing} className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066E0] shadow-sm shadow-[#007AFF]/20">
@@ -447,7 +459,7 @@ export function WorkflowDetail() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-              {DEPENDENCIES.some((d) => d.id === workflow.currentArea) && workflow.status === "IN_PROGRESS" && (
+              {canAdvance && DEPENDENCIES.some((d) => d.id === workflow.currentArea) && workflow.status === "IN_PROGRESS" && (
                 <Button size="sm" onClick={() => handleAdvance("EXECUTIVE_ACCOUNTANT")} disabled={advancing} className="rounded-full bg-[#FF9500] text-white hover:bg-[#E68600] shadow-sm shadow-[#FF9500]/20">
                   {advancing ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <><RotateCcw className="mr-1 h-3.5 w-3.5" />Devolver a Ejecutiva</>}
                 </Button>
@@ -522,7 +534,12 @@ export function WorkflowDetail() {
                 {!canEdit && workflow.status === "IN_PROGRESS" && (
                   <div className="mb-4 flex items-center gap-2 rounded-xl bg-[#FF9500]/8 p-3">
                     <AlertTriangle className="h-4 w-4 text-[#FF9500]" />
-                    <p className="text-sm text-[#FF9500]">Solo <strong>{AREA_LABEL_MAP[workflow.currentArea]}</strong> puede editar en este momento.</p>
+                    <p className="text-sm text-[#FF9500]">
+                      {user?.role === "admin"
+                        ? "Este formato está en progreso."
+                        : <>Solo <strong>{AREA_LABEL_MAP[workflow.currentArea]}</strong> puede editar en este momento.</>
+                      }
+                    </p>
                   </div>
                 )}
 
@@ -572,6 +589,30 @@ export function WorkflowDetail() {
 
           {/* Sidebar */}
           <div className="space-y-4">
+            {/* Current Area & User Info */}
+            <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+              <CardContent className="p-4 space-y-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868B]">Estado Actual</h3>
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: currentAreaInfo?.color }} />
+                  <span className="text-sm font-medium text-[#1D1D1F]">
+                    Área: {AREA_LABEL_MAP[workflow.currentArea]}
+                  </span>
+                </div>
+                {user && (
+                  <div className="flex items-center gap-2 text-xs text-[#86868B]">
+                    <Users className="h-3.5 w-3.5" />
+                    <span>Usuario: {user.name} ({AREA_LABEL_MAP[user.area]})</span>
+                  </div>
+                )}
+                {user?.role === "admin" && (
+                  <Badge className="rounded-full bg-[#5856D6]/10 text-[#5856D6] text-[10px]">
+                    Modo administrador - edición global
+                  </Badge>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Actions */}
             <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
               <CardContent className="p-4 space-y-2">

@@ -1,15 +1,34 @@
 "use client";
 
-import { useAppStore } from "@/lib/store";
+import { useAppStore, AuthUser } from "@/lib/store";
+import { LoginPage } from "@/components/login-page";
 import { LandingPage } from "@/components/landing";
 import { Dashboard } from "@/components/dashboard";
 import { WorkflowDetail } from "@/components/workflow-detail";
 import { NotificationsPanel } from "@/components/notifications-panel";
 import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
+import { useState } from "react";
 
 export default function Home() {
-  const { currentView } = useAppStore();
+  const { currentView, isAuthenticated, setUser, setToken, logout } = useAppStore();
+  const [authChecked, setAuthChecked] = useState(isAuthenticated);
+
+  const handleLogin = (user: AuthUser, token: string) => {
+    setUser(user);
+    setToken(token);
+    setAuthChecked(true);
+  };
+
+  // Show login if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <>
+        <LoginPage onLogin={handleLogin} />
+        <Toaster position="bottom-right" richColors closeButton />
+      </>
+    );
+  }
 
   return (
     <>

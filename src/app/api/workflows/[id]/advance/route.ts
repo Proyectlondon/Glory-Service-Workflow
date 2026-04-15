@@ -1,6 +1,25 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { HUB_AREA, AREA_LABEL_MAP } from "@/lib/types";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = "glory-workflow-secret-key-2024";
+
+function getAuthUser(request: NextRequest) {
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  try {
+    const token = authHeader.replace("Bearer ", "");
+    return jwt.verify(token, JWT_SECRET) as {
+      id: string;
+      email: string;
+      role: string;
+      area: string;
+    };
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(
   request: NextRequest,
@@ -11,6 +30,16 @@ export async function POST(
     const body = await request.json();
     const { targetArea, fields } = body;
 
+    // Get authenticated user
+    const authUser = getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    // Fetch the user from DB for name
+    const dbUser = await db.user.findUnique({ where: { id: authUser.id } });
+    const userName = dbUser?.name || authUser.email;
+
     const workflow = await db.workflow.findUnique({ where: { id } });
     if (!workflow) {
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
@@ -18,6 +47,14 @@ export async function POST(
 
     if (workflow.status === "COMPLETED") {
       return NextResponse.json({ error: "Workflow already completed" }, { status: 400 });
+    }
+
+    // Check permission: admin can always advance, regular users only from their area
+    if (authUser.role !== "admin" && workflow.currentArea !== authUser.area) {
+      return NextResponse.json(
+        { error: "No tienes permiso para avanzar este formato" },
+        { status: 403 }
+      );
     }
 
     const current = workflow.currentArea;
@@ -62,7 +99,13 @@ export async function POST(
     const updateData: any = {
       currentArea: targetArea,
       completedAreas: JSON.stringify(completedAreas),
+      updatedBy: authUser.id,
     };
+
+    // Set createdBy if not set
+    if (!workflow.createdBy) {
+      updateData.createdBy = authUser.id;
+    }
 
     if (fields) {
       updateData.fields = {
@@ -93,13 +136,13 @@ export async function POST(
     let notifType = "area_change";
 
     if (action === "FORWARDED") {
-      notifMessage = `Dispatcher envió "${workflow.name}" a Ejecutiva de Cuenta para procesamiento.`;
+      notifMessage = `${userName} envió "${workflow.name}" a Ejecutiva de Cuenta para procesamiento.`;
       notifType = "area_change";
     } else if (action === "ESCALATED") {
-      notifMessage = `Ejecutiva de Cuenta escaló "${workflow.name}" a ${AREA_LABEL_MAP[targetArea]} por información faltante.`;
+      notifMessage = `${userName} (Ejecutiva) escaló "${workflow.name}" a ${AREA_LABEL_MAP[targetArea]} por información faltante.`;
       notifType = "escalation";
     } else if (action === "RETURNED") {
-      notifMessage = `${AREA_LABEL_MAP[current]} devolvió "${workflow.name}" a Ejecutiva de Cuenta con información diligenciada.`;
+      notifMessage = `${userName} (${AREA_LABEL_MAP[current]}) devolvió "${workflow.name}" a Ejecutiva de Cuenta con información diligenciada.`;
       notifType = "return";
     }
 
@@ -110,6 +153,14 @@ export async function POST(
         type: notifType,
       },
     });
+
+    // Email notification: look up user for target area and log
+    const targetAreaUser = await db.user.findFirst({
+      where: { area: targetArea, isActive: true },
+    });
+    if (targetAreaUser) {
+      console.log(`📧 Notificación por email a ${targetAreaUser.email}: ${notifMessage}`);
+    }
 
     const updated = await db.workflow.findUnique({
       where: { id },

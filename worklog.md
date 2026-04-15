@@ -144,3 +144,71 @@ Stage Summary:
 - The `completedAreas` issue (Unknown argument) is fully resolved — Prisma schema defines it as String with default "[]", and the API correctly JSON.parse/stringify handles it
 - Caddy proxy on port 81 works when the server is alive — 502 errors only occur when the server has been killed by the sandbox
 - No code changes were needed; the application is fully functional
+
+---
+Task ID: 10
+Agent: Main Agent
+Task: Implement complete user authentication and role-based system
+
+Work Log:
+- Added User model to Prisma schema (id, name, email, password, area, role, avatar, isActive)
+- Added createdBy and updatedBy fields to Workflow model
+- Installed bcryptjs and jsonwebtoken packages (+ type definitions)
+- Created 5 auth API routes: register, login, me, users (admin CRUD), seed
+- Created LoginPage component with Apple-style design, demo user quick-login
+- Updated Zustand store with user, token, isAuthenticated state + auto-restore from localStorage
+- Updated page.tsx with auth gate (shows LoginPage when not authenticated)
+- Updated Dashboard: user avatar/info in header, area-based workflow filtering, "Mis Pendientes" section, logout button
+- Updated WorkflowDetail: canEdit now checks user area vs workflow currentArea (admin bypass)
+- Updated advance API: JWT authentication, area permission check, user name in notifications, email logging
+- Updated NotificationsPanel: area relevance badges, single-click mark-read, user context display
+- Seeded 9 default users (one per area + admin)
+
+Stage Summary:
+- Complete authentication system with JWT tokens (7-day expiry)
+- Role-based access control: admin (full access) and user (area-scoped access)
+- Area-based workflow visibility: users see workflows relevant to their area
+- Area-based edit permissions: only users assigned to the workflow's currentArea can edit
+- Advance API now requires authentication and verifies area permissions
+- Notifications include the name of the user who performed the action
+- Email notification logging on workflow advance (architecture for real email integration)
+
+## New Files Created
+1. `/home/z/my-project/src/app/api/auth/register/route.ts` - User registration
+2. `/home/z/my-project/src/app/api/auth/login/route.ts` - User login
+3. `/home/z/my-project/src/app/api/auth/me/route.ts` - Get current user from JWT
+4. `/home/z/my-project/src/app/api/auth/users/route.ts` - Admin user management (GET list, POST create)
+5. `/home/z/my-project/src/app/api/auth/seed/route.ts` - Seed default demo users
+6. `/home/z/my-project/src/components/login-page.tsx` - Login page with demo user quick-login
+
+## Files Modified
+1. `/home/z/my-project/prisma/schema.prisma` - Added User model, createdBy/updatedBy to Workflow
+2. `/home/z/my-project/src/lib/store.ts` - Added AuthUser type, user/token/isAuthenticated state, logout, auto-restore
+3. `/home/z/my-project/src/app/page.tsx` - Added auth gate, LoginPage import
+4. `/home/z/my-project/src/components/dashboard.tsx` - User header, area filtering, pending section, logout
+5. `/home/z/my-project/src/components/workflow-detail.tsx` - Area-based canEdit, user info sidebar, admin badge
+6. `/home/z/my-project/src/components/notifications-panel.tsx` - Area relevance, mark single read
+7. `/home/z/my-project/src/app/api/workflows/[id]/advance/route.ts` - JWT auth, area check, user name in notifications, email logging
+
+## Default User Credentials (all use password: 123456)
+| Email | Name | Area | Role |
+|-------|------|------|------|
+| admin@glory.com | Admin | DISPATCHER | admin |
+| dispatcher@glory.com | Dispatcher | DISPATCHER | user |
+| ejecutiva@glory.com | Ejecutiva | EXECUTIVE_ACCOUNTANT | user |
+| financiera@glory.com | Financiera | FINANCE | user |
+| operaciones@glory.com | Operaciones | OPERATIONS | user |
+| juridica@glory.com | Juridica | LEGAL | user |
+| tecnologia@glory.com | Tecnologia | IT | user |
+| cadena@glory.com | Cadena de Suministro | SUPPLY_CHAIN | user |
+| soporte@glory.com | Soporte | SERVICE_SUPPORT | user |
+
+## How to Use
+1. Open the app - you'll see the login page
+2. Click "Crear usuarios" to seed demo users (or they're already seeded)
+3. Click any demo user to auto-login, or enter email/password manually
+4. After login you'll see the dashboard filtered by your area
+5. Admin users see all workflows; regular users see workflows in their area
+6. Workflow edit permissions match the workflow's current area (admin can edit anywhere)
+7. Use the avatar dropdown in the header to see user details and logout
+8. Notifications show who performed each action
