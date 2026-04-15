@@ -197,6 +197,12 @@ function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled
   );
 }
 
+// Helper to get auth headers from Zustand store
+function getAuthHeaders(): Record<string, string> {
+  const token = useAppStore.getState().token;
+  return token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" };
+}
+
 export function WorkflowDetail() {
   const { selectedWorkflowId, setCurrentView, updateWorkflowInList, isLoading, setIsLoading, user } = useAppStore();
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
@@ -261,7 +267,7 @@ export function WorkflowDetail() {
     try {
       const res = await fetch(`/api/workflows/${workflow.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ name: workflow.name, fields: workflow.fields.map((f, i) => ({ label: f.label, value: f.value, fieldType: f.fieldType, area: f.area, required: f.required, orderIndex: i })) }),
       });
       if (res.ok) {
@@ -283,7 +289,7 @@ export function WorkflowDetail() {
     try {
       const res = await fetch(`/api/workflows/${workflow.id}/advance`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ targetArea, fields: workflow.fields.map((f, i) => ({ label: f.label, value: f.value, fieldType: f.fieldType, area: f.area, required: f.required, orderIndex: i })) }),
       });
       if (res.ok) {
@@ -307,7 +313,7 @@ export function WorkflowDetail() {
     try {
       const res = await fetch(`/api/workflows/${workflow.id}/complete`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ fields: workflow.fields.map((f, i) => ({ label: f.label, value: f.value, fieldType: f.fieldType, area: f.area, required: f.required, orderIndex: i })) }),
       });
       if (res.ok) {
@@ -347,7 +353,7 @@ export function WorkflowDetail() {
     try {
       const res = await fetch(`/api/workflows/${workflow.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ name: workflowName.trim(), fields: workflow.fields.map((f, i) => ({ label: f.label, value: f.value, fieldType: f.fieldType, area: f.area, required: f.required, orderIndex: i })) }),
       });
       if (res.ok) {
