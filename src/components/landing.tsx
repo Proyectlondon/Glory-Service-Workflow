@@ -27,22 +27,22 @@ export function LandingPage() {
   const { setCurrentView } = useAppStore();
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7]">
+    <div className="min-h-screen bg-background">
       {/* Header - Apple style frosted glass */}
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-2xl">
+      <header className="sticky top-0 z-50 border-b border-border bg-card/70 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#007AFF] to-[#0055D4] shadow-sm">
               <FileText className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-semibold tracking-tight text-[#1D1D1F]">
-              Glory Service <span className="text-[#007AFF]">Workflow</span>
+            <span className="text-lg font-semibold tracking-tight text-foreground">
+              Glory Service <span className="text-primary">Workflow</span>
             </span>
           </div>
           <Button
             variant="ghost"
             onClick={() => setCurrentView("dashboard")}
-            className="rounded-full px-5 text-sm font-medium text-[#007AFF] hover:bg-[#007AFF]/5"
+            className="rounded-full px-5 text-sm font-medium text-primary hover:bg-primary/5"
           >
             Open App
           </Button>
@@ -64,14 +64,14 @@ export function LandingPage() {
               <Zap className="h-3.5 w-3.5" />
               MVP de Productividad Empresarial
             </div>
-            <h1 className="mx-auto max-w-3xl text-5xl font-bold leading-tight tracking-tight text-[#1D1D1F] sm:text-6xl lg:text-7xl">
+            <h1 className="mx-auto max-w-3xl text-5xl font-bold leading-tight tracking-tight text-foreground sm:text-6xl lg:text-7xl">
               Flujos de servicio,
               <br />
-              <span className="bg-gradient-to-r from-[#007AFF] to-[#5856D6] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-[#5856D6] bg-clip-text text-transparent">
                 simplificados.
               </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-[#86868B] sm:text-xl">
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
               Sube formatos en Word, procesa la información entre áreas y descarga documentos
               completamente diligenciados. Sin complicaciones.
             </p>
@@ -104,8 +104,8 @@ export function LandingPage() {
           viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="text-sm font-medium uppercase tracking-wider text-[#007AFF]">Cómo funciona</p>
-          <h2 className="mt-2 text-4xl font-bold tracking-tight text-[#1D1D1F] sm:text-5xl">
+          <p className="text-sm font-medium uppercase tracking-wider text-primary">Cómo funciona</p>
+          <h2 className="mt-2 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Tres pasos. Cero complicaciones.
           </h2>
         </motion.div>
@@ -139,12 +139,12 @@ export function LandingPage() {
               transition={{ delay: i * 0.15 }}
               className="group text-center"
             >
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-all group-hover:shadow-md group-hover:ring-[#007AFF]/20">
-                <step.icon className="h-7 w-7 text-[#007AFF]" />
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-card shadow-sm ring-1 ring-border transition-all group-hover:shadow-md group-hover:ring-primary/20">
+                <step.icon className="h-7 w-7 text-primary" />
               </div>
-              <span className="text-xs font-bold text-[#007AFF]/60">{step.num}</span>
-              <h3 className="mt-1 text-lg font-semibold text-[#1D1D1F]">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#86868B]">{step.desc}</p>
+              <span className="text-xs font-bold text-primary/60">{step.num}</span>
+              <h3 className="mt-1 text-lg font-semibold text-foreground">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -159,11 +159,11 @@ export function LandingPage() {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
-            <p className="text-sm font-medium uppercase tracking-wider text-[#007AFF]">Modelo de flujo</p>
-            <h2 className="mt-2 text-4xl font-bold tracking-tight text-[#1D1D1F]">
+            <p className="text-sm font-medium uppercase tracking-wider text-primary">Modelo de flujo</p>
+            <h2 className="mt-2 text-4xl font-bold tracking-tight text-foreground">
               Hub & Spoke inteligente
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-[#86868B]">
+            <p className="mx-auto mt-4 max-w-md text-muted-foreground">
               La Ejecutiva de Cuenta es el centro. Escala a dependencias y recibe respuestas automáticamente.
             </p>
           </motion.div>
@@ -177,11 +177,11 @@ export function LandingPage() {
               viewport={{ once: true }}
               className="relative z-10 mx-auto flex flex-col items-center"
             >
-              <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#007AFF] to-[#0055D4] shadow-xl shadow-[#007AFF]/20">
+              <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-[#0055D4] shadow-xl shadow-primary/20">
                 <UserCheck className="h-10 w-10 text-white" />
               </div>
-              <span className="mt-3 text-sm font-semibold text-[#1D1D1F]">Ejecutiva de Cuenta</span>
-              <span className="text-xs text-[#86868B]">Centro de operaciones</span>
+              <span className="mt-3 text-sm font-semibold text-foreground">Ejecutiva de Cuenta</span>
+              <span className="text-xs text-muted-foreground">Centro de operaciones</span>
             </motion.div>
 
             {/* Spokes - Dependencies in a circle */}
@@ -245,14 +245,14 @@ export function LandingPage() {
 
           {/* Dispatcher → EA arrow */}
           <div className="mt-8 flex items-center justify-center gap-4">
-            <div className="flex items-center gap-2 rounded-xl bg-[#F5F5F7] px-4 py-2 ring-1 ring-black/5">
-              <Mail className="h-4 w-4 text-[#6B7280]" />
-              <span className="text-sm font-medium text-[#1D1D1F]">Dispatcher</span>
+            <div className="flex items-center gap-2 rounded-xl bg-muted px-4 py-2 ring-1 ring-border">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Dispatcher</span>
             </div>
-            <ArrowRight className="h-4 w-4 text-[#007AFF]" />
-            <div className="flex items-center gap-2 rounded-xl bg-[#007AFF]/8 px-4 py-2 ring-1 ring-[#007AFF]/20">
-              <UserCheck className="h-4 w-4 text-[#007AFF]" />
-              <span className="text-sm font-medium text-[#007AFF]">Ejecutiva de Cuenta</span>
+            <ArrowRight className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-2 rounded-xl bg-primary/8 px-4 py-2 ring-1 ring-primary/20">
+              <UserCheck className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Ejecutiva de Cuenta</span>
             </div>
           </div>
           <div className="mt-4 flex items-center justify-center gap-4">
@@ -296,13 +296,13 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
+            className="rounded-3xl bg-card p-8 ring-1 ring-border transition-all hover:shadow-lg"
           >
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#007AFF]/10">
-              <Shield className="h-5 w-5 text-[#007AFF]" />
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10">
+              <Shield className="h-5 w-5 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold text-[#1D1D1F]">Control total</h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+            <h3 className="text-lg font-semibold text-foreground">Control total</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Supervisa en tiempo real cada formato. Sabrás en qué área está, qué falta por diligenciar y el historial completo de escalamientos.
             </p>
           </motion.div>

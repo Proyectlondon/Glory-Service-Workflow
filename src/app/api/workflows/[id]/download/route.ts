@@ -13,6 +13,7 @@ import {
   TableCell,
   WidthType,
   ShadingType,
+  Packer,
 } from "docx";
 
 export async function GET(
@@ -253,7 +254,7 @@ export async function GET(
       sections: [{ children }],
     });
 
-    const buffer = await doc.toBuffer();
+    const buffer = await Packer.toBuffer(doc);
     const fileName = `${workflow.name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, "_")}_completado.docx`;
 
     return new NextResponse(buffer, {

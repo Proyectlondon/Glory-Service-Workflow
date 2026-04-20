@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Mail, Lock, Eye, EyeOff, LogIn, ChevronRight } from "lucide-react";
+import { FileText, Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,30 +24,14 @@ interface LoginPageProps {
   onLogin: (user: LoginUser, token: string) => void;
 }
 
-const DEMO_USERS = [
-  { email: "admin@glory.com", password: "123456", area: "Admin", role: "admin" },
-  { email: "dispatcher@glory.com", password: "123456", area: "Dispatcher" },
-  { email: "ejecutiva@glory.com", password: "123456", area: "Ejecutiva de Cuenta" },
-  { email: "financiera@glory.com", password: "123456", area: "Financiera" },
-  { email: "operaciones@glory.com", password: "123456", area: "Operaciones" },
-  { email: "juridica@glory.com", password: "123456", area: "Juridica" },
-  { email: "tecnologia@glory.com", password: "123456", area: "Tecnologia" },
-  { email: "cadena@glory.com", password: "123456", area: "Cadena de Suministro" },
-  { email: "soporte@glory.com", password: "123456", area: "Soporte" },
-];
-
 export function LoginPage({ onLogin }: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [seeding, setSeeding] = useState(false);
 
-  const handleLogin = async (loginEmail?: string, loginPassword?: string) => {
-    const userEmail = loginEmail || email;
-    const userPassword = loginPassword || password;
-
-    if (!userEmail || !userPassword) {
+  const handleLogin = async () => {
+    if (!email || !password) {
       toast.error("Ingresa correo y contraseña");
       return;
     }
@@ -57,7 +41,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail, password: userPassword }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -79,29 +63,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     }
   };
 
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/auth/seed", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.message);
-      } else {
-        toast.error(data.error || "Error al crear usuarios");
-      }
-    } catch {
-      toast.error("Error de conexión");
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleLogin();
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] flex">
+    <div className="min-h-screen bg-background flex">
       {/* Left - Login Form */}
       <div className="flex flex-1 items-center justify-center px-6 py-12">
         <motion.div
@@ -116,41 +83,41 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.4 }}
-              className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#007AFF] to-[#5856D6] shadow-lg shadow-[#007AFF]/20"
+              className="mx-auto mb-4 flex h-20 w-auto items-center justify-center p-2"
             >
-              <FileText className="h-8 w-8 text-white" />
+              <img src="/corporate-logo.png" alt="Glory Logo" className="h-full object-contain" />
             </motion.div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#1D1D1F]">
-              Glory Service <span className="text-[#007AFF]">Workflow</span>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              Workflow de Servicios
             </h1>
-            <p className="mt-1 text-sm text-[#86868B]">
+            <p className="mt-1 text-sm text-muted-foreground">
               Inicia sesión para gestionar tus flujos de trabajo
             </p>
           </div>
 
           {/* Login Card */}
-          <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+          <Card className="rounded-2xl border border-black/5 dark:border-white/10 bg-card shadow-sm">
             <CardContent className="p-6 space-y-4">
               <div>
-                <label className="text-sm font-medium text-[#1D1D1F]">
-                  Correo electrónico
+                <label className="text-sm font-medium text-foreground">
+                  Usuario o Correo
                 </label>
                 <div className="relative mt-1.5">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C7C7CC]" />
                   <Input
-                    type="email"
-                    placeholder="correo@glory.com"
+                    type="text"
+                    placeholder="ej: admin o correo@glory.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="h-11 rounded-xl border-black/10 bg-[#FAFAFA] pl-10 text-sm placeholder:text-[#C7C7CC]"
-                    autoComplete="email"
+                    className="h-11 rounded-xl border-black/10 dark:border-white/10 bg-muted pl-10 text-sm placeholder:text-[#C7C7CC]"
+                    autoComplete="username"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-[#1D1D1F]">
+                <label className="text-sm font-medium text-foreground">
                   Contraseña
                 </label>
                 <div className="relative mt-1.5">
@@ -161,7 +128,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="h-11 rounded-xl border-black/10 bg-[#FAFAFA] pl-10 pr-10 text-sm placeholder:text-[#C7C7CC]"
+                    className="h-11 rounded-xl border-black/10 dark:border-white/10 bg-muted pl-10 pr-10 text-sm placeholder:text-[#C7C7CC]"
                     autoComplete="current-password"
                   />
                   <button
@@ -194,65 +161,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </Button>
             </CardContent>
           </Card>
-
-          {/* Demo Users Section */}
-          <Card className="mt-4 rounded-2xl border border-black/5 bg-white shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868B]">
-                  Usuarios Demo
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSeed}
-                  disabled={seeding}
-                  className="text-[10px] text-[#007AFF] hover:bg-[#007AFF]/5 h-6 px-2"
-                >
-                  {seeding ? "Creando..." : "Crear usuarios"}
-                </Button>
-              </div>
-              <div className="grid gap-1.5 max-h-48 overflow-y-auto pr-1">
-                {DEMO_USERS.map((user) => (
-                  <button
-                    key={user.email}
-                    onClick={() => {
-                      setEmail(user.email);
-                      setPassword(user.password);
-                      handleLogin(user.email, user.password);
-                    }}
-                    disabled={loading}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-all hover:bg-[#F5F5F7] group disabled:opacity-50"
-                  >
-                    <div
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-[10px] font-bold text-white"
-                      style={{
-                        backgroundColor:
-                          user.role === "admin"
-                            ? "#5856D6"
-                            : "#007AFF",
-                      }}
-                    >
-                      {user.area.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-[#1D1D1F] truncate">
-                        {user.area}
-                      </p>
-                      <p className="text-[10px] text-[#C7C7CC] truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-[#C7C7CC] opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <p className="mt-6 text-center text-xs text-[#C7C7CC]">
-            Todos los usuarios demo usan la contraseña: <span className="font-medium text-[#86868B]">123456</span>
-          </p>
         </motion.div>
       </div>
 
@@ -272,7 +180,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           className="relative z-10 max-w-md px-12 text-white"
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
-            <FileText className="h-3.5 w-3.5" />
+            <img src="/corporate-logo.png" alt="Glory Icon" className="h-5 w-auto" />
             MVP de Productividad
           </div>
           <h2 className="text-4xl font-bold leading-tight">

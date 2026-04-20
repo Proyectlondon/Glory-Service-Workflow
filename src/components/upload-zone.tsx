@@ -42,7 +42,7 @@ export function UploadZone() {
         size="sm"
         onClick={() => fileRef.current?.click()}
         disabled={uploading}
-        className="rounded-full bg-[#007AFF] px-5 text-sm font-medium text-white shadow-sm shadow-[#007AFF]/20 hover:bg-[#0066E0]"
+        className="rounded-full bg-primary px-5 text-sm font-medium text-white shadow-sm shadow-primary/20 hover:bg-primary/90"
       >
         {uploading ? (
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

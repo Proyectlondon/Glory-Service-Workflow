@@ -82,17 +82,17 @@ export function NotificationsPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7]">
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-2xl">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 border-b border-border bg-card/70 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" className="rounded-full hover:bg-black/5" onClick={() => setCurrentView("dashboard")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-[#007AFF]" />
-              <h1 className="text-base font-semibold text-[#1D1D1F]">Notificaciones</h1>
-              {unreadCount > 0 && <Badge className="rounded-full bg-[#007AFF]/10 text-[#007AFF] text-[11px]">{unreadCount}</Badge>}
+              <Bell className="h-5 w-5 text-primary" />
+              <h1 className="text-base font-semibold text-foreground">Notificaciones</h1>
+              {unreadCount > 0 && <Badge className="rounded-full bg-primary/10 text-primary text-[11px]">{unreadCount}</Badge>}
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -115,14 +115,14 @@ export function NotificationsPanel() {
             >
               {AREA_LABEL_MAP[user.area]}
             </Badge>
-            <span className="text-xs text-[#86868B]">Mostrando todas las notificaciones</span>
+            <span className="text-xs text-muted-foreground">Mostrando todas las notificaciones</span>
           </div>
         )}
 
         <div className="mb-4 flex gap-1">
           <div className="flex rounded-xl border border-black/5 bg-white p-1">
             {(["all", "unread"] as const).map((f) => (
-              <button key={f} onClick={() => setFilter(f)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${filter === f ? "bg-[#007AFF] text-white shadow-sm" : "text-[#86868B] hover:text-[#1D1D1F]"}`}>
+              <button key={f} onClick={() => setFilter(f)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${filter === f ? "bg-[#007AFF] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
                 {f === "all" ? "Todas" : "No leídas"}
               </button>
             ))}
@@ -135,8 +135,8 @@ export function NotificationsPanel() {
               <Card className="rounded-2xl border-black/5 bg-white shadow-sm">
                 <CardContent className="flex flex-col items-center py-20 text-center">
                   <Bell className="mb-4 h-12 w-12 text-[#C7C7CC]" />
-                  <h3 className="text-lg font-semibold text-[#1D1D1F]">Sin notificaciones</h3>
-                  <p className="mt-1 text-sm text-[#86868B]">Las notificaciones aparecerán aquí.</p>
+                  <h3 className="text-lg font-semibold text-foreground">Sin notificaciones</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">Las notificaciones aparecerán aquí.</p>
                 </CardContent>
               </Card>
             ) : (
@@ -145,7 +145,7 @@ export function NotificationsPanel() {
                 return (
                   <motion.div key={n.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
                     <Card
-                      className={`cursor-pointer rounded-2xl border border-black/5 bg-white shadow-sm transition-all hover:shadow-md ${!n.read ? "ring-1 ring-[#007AFF]/20" : ""}`}
+                      className={`cursor-pointer rounded-2xl border border-border bg-card shadow-sm transition-all hover:shadow-md ${!n.read ? "ring-1 ring-primary/20" : ""}`}
                       onClick={() => { openWorkflow(n.workflowId); handleMarkSingleRead(n.id); }}
                     >
                       <CardContent className="flex items-start gap-3 p-4">

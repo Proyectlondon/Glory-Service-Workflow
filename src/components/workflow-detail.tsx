@@ -61,6 +61,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
+import { AIAssistant } from "./ai-assistant";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Mail, UserCheck, DollarSign, Settings, Shield, Cpu, Package, Headphones,
@@ -261,6 +262,17 @@ export function WorkflowDetail() {
     setWorkflow({ ...workflow, fields: workflow.fields.map((f) => (f.id === fieldId ? { ...f, value } : f)) });
   };
 
+  const handleAIFill = (fieldLabel: string, value: string) => {
+    if (!workflow) return;
+    const field = workflow.fields.find(f => f.label.toLowerCase().includes(fieldLabel.toLowerCase()));
+    if (field) {
+      updateFieldValue(field.id, value);
+      toast.success(`IA: Campo "${field.label}" actualizado`);
+    } else {
+      toast.error(`IA: No encontré el campo "${fieldLabel}"`);
+    }
+  };
+
   const handleSave = async () => {
     if (!workflow) return;
     setSaving(true);
@@ -366,8 +378,8 @@ export function WorkflowDetail() {
   };
 
   if (isLoading || !workflow) return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F5F5F7]">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#007AFF] border-t-transparent" />
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
     </div>
   );
 
@@ -383,9 +395,9 @@ export function WorkflowDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-black/5 bg-white/70 backdrop-blur-2xl">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-3">
           <Button variant="ghost" size="icon" className="rounded-full hover:bg-black/5" onClick={() => setCurrentView("dashboard")}>
             <ArrowLeft className="h-4 w-4" />
@@ -397,9 +409,9 @@ export function WorkflowDetail() {
                 <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleNameUpdate}><CheckCircle2 className="h-4 w-4 text-[#34C759]" /></Button>
               </div>
             ) : (
-              <button onClick={() => setEditingName(true)} className="group truncate text-sm font-semibold text-[#1D1D1F] hover:text-[#007AFF] transition-colors text-left">
+              <button onClick={() => setEditingName(true)} className="group truncate text-sm font-semibold text-foreground hover:text-primary transition-colors text-left">
                 {workflow.name}
-                <Settings className="inline h-3 w-3 ml-1 text-[#C7C7CC] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Settings className="inline h-3 w-3 ml-1 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
             )}
           </div>
@@ -418,18 +430,18 @@ export function WorkflowDetail() {
 
       <main className="mx-auto max-w-6xl px-6 py-6">
         {/* Status + Hub Navigation */}
-        <div className="mb-6 rounded-2xl border border-black/5 bg-white p-5 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               {(() => { const Icon = ICON_MAP[currentAreaInfo?.icon || "Settings"] || Settings; return <Icon className="h-5 w-5" style={{ color: currentAreaInfo?.color }} />; })()}
               <div>
-                <p className="text-sm font-semibold text-[#1D1D1F]">
+                <p className="text-sm font-semibold text-foreground">
                   {AREA_LABEL_MAP[workflow.currentArea]}
                   {workflow.status === "COMPLETED" && (
-                    <Badge className="ml-2 rounded-full bg-[#34C759]/10 text-[#34C759] text-[11px]">Completado</Badge>
+                    <Badge className="ml-2 rounded-full bg-green-500/10 text-green-500 text-[11px]">Completado</Badge>
                   )}
                 </p>
-                <p className="text-xs text-[#86868B]">{currentAreaInfo?.description}</p>
+                <p className="text-xs text-muted-foreground">{currentAreaInfo?.description}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -485,7 +497,7 @@ export function WorkflowDetail() {
                   key={area.id}
                   onClick={() => setActiveArea(area.id)}
                   className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                    active ? "bg-[#007AFF] text-white shadow-sm" : "bg-[#F5F5F7] text-[#86868B] hover:bg-[#E8EDF3] hover:text-[#1D1D1F]"
+                    active ? "bg-primary text-white shadow-sm" : "bg-muted text-muted-foreground hover:bg-secondary hover:text-foreground"
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -501,14 +513,18 @@ export function WorkflowDetail() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Field Editor */}
           <div className="lg:col-span-2">
-            <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+            <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    {(() => { const Icon = ICON_MAP[AREAS.find((a) => a.id === activeArea)?.icon || "Settings"] || Settings; return <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: `${AREAS.find((a) => a.id === activeArea)?.color}12` }}><Icon className="h-4 w-4" style={{ color: AREAS.find((a) => a.id === activeArea)?.color }} /></div>; })()}
+                    {(() => { 
+                      const area = AREAS.find((a) => a.id === activeArea);
+                      const Icon = ICON_MAP[area?.icon || "Settings"] || Settings; 
+                      return <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: `${area?.color || "#E5E5EA"}12` }}><Icon className="h-4 w-4" style={{ color: area?.color || "#6B7280" }} /></div>; 
+                    })()}
                     <div>
-                      <CardTitle className="text-sm text-[#1D1D1F]">{AREA_LABEL_MAP[activeArea]}</CardTitle>
-                      <p className="text-[11px] text-[#86868B]">{areaFields.length} campos</p>
+                      <CardTitle className="text-sm text-foreground">{AREA_LABEL_MAP[activeArea]}</CardTitle>
+                      <p className="text-[11px] text-muted-foreground">{areaFields.length} campos</p>
                     </div>
                   </div>
                   {canEdit && (
@@ -552,10 +568,10 @@ export function WorkflowDetail() {
                 <div className="space-y-3">
                   <AnimatePresence>
                     {areaFields.map((field) => (
-                      <motion.div key={field.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="group rounded-xl border border-black/5 bg-[#F5F5F7] p-4 transition-all hover:bg-white hover:shadow-sm">
+                      <motion.div key={field.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="group rounded-xl border border-border bg-muted p-4 transition-all hover:bg-card hover:shadow-sm">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-1.5">
-                            <Label className="text-sm font-medium text-[#1D1D1F]">{field.label}</Label>
+                            <Label className="text-sm font-medium text-foreground">{field.label}</Label>
                             {field.required && <span className="text-[#FF3B30] text-xs">*</span>}
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -596,7 +612,7 @@ export function WorkflowDetail() {
           {/* Sidebar */}
           <div className="space-y-4">
             {/* Current Area & User Info */}
-            <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+            <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4 space-y-3">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868B]">Estado Actual</h3>
                 <div className="flex items-center gap-2">
@@ -620,7 +636,7 @@ export function WorkflowDetail() {
             </Card>
 
             {/* Actions */}
-            <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+            <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4 space-y-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868B]">Acciones</h3>
                 <Button variant="outline" className="w-full rounded-xl border-black/10 bg-white justify-start text-[#1D1D1F] hover:bg-[#F5F5F7]" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")}>
@@ -630,7 +646,7 @@ export function WorkflowDetail() {
             </Card>
 
             {/* Dependencies Status */}
-            <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+            <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4">
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868B]">Estado de Dependencias</h3>
                 <div className="space-y-1.5">
@@ -661,7 +677,7 @@ export function WorkflowDetail() {
 
             {/* History */}
             {workflow.areaLogs && workflow.areaLogs.length > 0 && (
-              <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+              <Card className="rounded-2xl border border-border bg-card shadow-sm">
                 <CardContent className="p-4">
                   <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868B]">Historial</h3>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -684,7 +700,7 @@ export function WorkflowDetail() {
             )}
 
             {/* Info */}
-            <Card className="rounded-2xl border border-black/5 bg-white shadow-sm">
+            <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4">
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868B]">Info</h3>
                 <div className="space-y-1.5 text-xs">
@@ -697,6 +713,12 @@ export function WorkflowDetail() {
           </div>
         </div>
       </main>
+
+      <AIAssistant 
+        workflow={workflow} 
+        onApplyField={handleAIFill} 
+        activeArea={activeArea}
+      />
     </div>
   );
 }

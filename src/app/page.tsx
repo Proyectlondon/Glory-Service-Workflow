@@ -41,7 +41,7 @@ export default function Home() {
           transition={{ duration: 0.2 }}
         >
           {currentView === "landing" && <LandingPage />}
-          {currentView === "dashboard" && <Dashboard />}
+          {(currentView === "dashboard" || currentView === "users") && <Dashboard />}
           {currentView === "workflow-detail" && <WorkflowDetail />}
           {currentView === "notifications" && <NotificationsPanel />}
         </motion.div>
