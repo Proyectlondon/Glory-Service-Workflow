@@ -11,6 +11,7 @@ import {
   Trash2, 
   ArrowLeft,
   Lock,
+  Pencil,
   User as UserIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ export function UserManagement() {
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<{id: string, name: string} | null>(null);
+  const [userToEdit, setUserToEdit] = useState<AuthUser | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -73,16 +75,20 @@ export function UserManagement() {
     fetchUsers();
   }, []);
 
-  const handleCreateUser = async (e: React.FormEvent) => {
+  const handleSaveUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.password) {
+    if (!formData.name || !formData.email || (!userToEdit && !formData.password)) {
       toast.error("Completa todos los campos requeridos");
       return;
     }
 
+    const isEditing = !!userToEdit;
+    const url = isEditing ? `/api/auth/users/${userToEdit.id}` : "/api/auth/users";
+    const method = isEditing ? "PUT" : "POST";
+
     try {
-      const res = await fetch("/api/auth/users", {
-        method: "POST",
+      const res = await fetch(url, {
+        method,
         headers: { 
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}` 
@@ -91,17 +97,30 @@ export function UserManagement() {
       });
 
       if (res.ok) {
-        toast.success("Usuario creado exitosamente");
+        toast.success(isEditing ? "Usuario actualizado" : "Usuario creado");
         setIsDialogOpen(false);
+        setUserToEdit(null);
         setFormData({ name: "", email: "", password: "", area: "DISPATCHER", role: "user" });
         fetchUsers();
       } else {
         const data = await res.json();
-        toast.error(data.error || "Error al crear usuario");
+        toast.error(data.error || "Error al procesar solicitud");
       }
     } catch {
       toast.error("Error de conexión");
     }
+  };
+
+  const handleEditClick = (user: AuthUser) => {
+    setUserToEdit(user);
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      password: "", // Password stays empty unless changing it
+      area: user.area || "DISPATCHER",
+      role: user.role || "user"
+    });
+    setIsDialogOpen(true);
   };
 
   const handleDeleteUser = async () => {
@@ -158,18 +177,35 @@ export function UserManagement() {
           </div>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog 
+          open={isDialogOpen} 
+          onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              setUserToEdit(null);
+              setFormData({ name: "", email: "", password: "", area: "DISPATCHER", role: "user" });
+            }
+          }}
+        >
           <DialogTrigger asChild>
-            <Button className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066E0]">
+            <Button 
+              className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066E0]"
+              onClick={() => {
+                setUserToEdit(null);
+                setFormData({ name: "", email: "", password: "", area: "DISPATCHER", role: "user" });
+              }}
+            >
               <UserPlus className="mr-2 h-4 w-4" />
               Nuevo Usuario
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md rounded-2xl border-border bg-card">
             <DialogHeader>
-              <DialogTitle className="text-foreground">Crear Nuevo Usuario</DialogTitle>
+              <DialogTitle className="text-foreground">
+                {userToEdit ? "Editar Usuario" : "Crear Nuevo Usuario"}
+              </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreateUser} className="space-y-4 pt-4">
+            <form onSubmit={handleSaveUser} className="space-y-4 pt-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Nombre Completo</label>
                 <div className="relative">
@@ -198,12 +234,14 @@ export function UserManagement() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Contraseña Inicial</label>
+                <label className="text-sm font-medium text-foreground">
+                  {userToEdit ? "Cambiar Contraseña (opcional)" : "Contraseña Inicial"}
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
                   <Input 
                     type="password" 
-                    placeholder="••••••" 
+                    placeholder={userToEdit ? "•••••• (dejar en blanco para no cambiar)" : "••••••"} 
                     className="pl-10 border-border bg-background text-foreground"
                     value={formData.password}
                     onChange={e => setFormData({ ...formData, password: e.target.value })}
@@ -246,7 +284,7 @@ export function UserManagement() {
               </div>
 
               <Button type="submit" className="w-full mt-4 rounded-xl bg-primary text-white hover:bg-primary/90">
-                Crear Usuario
+                {userToEdit ? "Guardar Cambios" : "Crear Usuario"}
               </Button>
             </form>
           </DialogContent>
@@ -317,6 +355,15 @@ export function UserManagement() {
                         {u.role !== "admin" && <span>Usuario</span>}
                       </div>
                     </div>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-[#007AFF] hover:bg-[#007AFF]/5 rounded-full"
+                      onClick={() => handleEditClick(u)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     
                     <Button 
                       variant="ghost" 
