@@ -128,13 +128,13 @@ function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled
             </div>
           </button>
         ) : (
-          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border border-black/10 bg-[#F5F5F7]">
-            <Paperclip className="h-6 w-6 text-[#007AFF]" />
+          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl border border-border bg-muted">
+            <Paperclip className="h-6 w-6 text-primary" />
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="truncate text-xs font-medium text-[#1D1D1F]">{evidence.name}</p>
-          <Badge className="mt-0.5 rounded-full bg-[#007AFF]/8 text-[#007AFF] text-[10px]">
+          <p className="truncate text-xs font-medium text-foreground">{evidence.name}</p>
+          <Badge className="mt-0.5 rounded-full bg-primary/10 text-primary text-[10px]">
             {formatSize(evidence.url)}
           </Badge>
         </div>
@@ -185,15 +185,15 @@ function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled
         }`}
       >
         {uploading ? (
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#007AFF] border-t-transparent" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         ) : (
           <>
-            <ImagePlus className="h-5 w-5 text-[#86868B]" />
-            <span className="text-[#86868B]">Subir foto o documento</span>
+            <ImagePlus className="h-5 w-5 text-muted-foreground" />
+            <span className="text-muted-foreground">Subir foto o documento</span>
           </>
         )}
       </button>
-      <p className="mt-1 text-center text-[10px] text-[#C7C7CC]">JPG, PNG, GIF, WebP, PDF, Word, Excel &middot; Máx. 10MB</p>
+      <p className="mt-1 text-center text-[10px] text-muted-foreground/60">JPG, PNG, GIF, WebP, PDF, Word, Excel &middot; Máx. 10MB</p>
     </div>
   );
 }
@@ -532,13 +532,13 @@ export function WorkflowDetail() {
                       <DialogTrigger asChild>
                         <Button size="icon" variant="ghost" className="rounded-full hover:bg-[#007AFF]/5 h-8 w-8"><Plus className="h-4 w-4 text-[#007AFF]" /></Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-sm rounded-2xl border-black/5">
-                        <DialogHeader><DialogTitle className="text-[#1D1D1F]">Agregar Campo</DialogTitle></DialogHeader>
+                      <DialogContent className="max-w-sm rounded-2xl border-border">
+                        <DialogHeader><DialogTitle className="text-foreground">Agregar Campo</DialogTitle></DialogHeader>
                         <div className="space-y-3 pt-2">
-                          <div><Label className="text-xs text-[#1D1D1F]">Nombre</Label><Input placeholder="Ej: Número de Referencia" value={newField.label} onChange={(e) => setNewField({ ...newField, label: e.target.value })} className="mt-1 rounded-xl border-black/10" /></div>
-                          <div><Label className="text-xs text-[#1D1D1F]">Tipo</Label><Select value={newField.fieldType} onValueChange={(v) => setNewField({ ...newField, fieldType: v })}><SelectTrigger className="mt-1 rounded-xl border-black/10"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl"><SelectItem value="text">Texto</SelectItem><SelectItem value="textarea">Texto largo</SelectItem><SelectItem value="number">Número</SelectItem><SelectItem value="date">Fecha</SelectItem><SelectItem value="evidence">Evidencia (foto/documento)</SelectItem></SelectContent></Select></div>
-                          <div><Label className="text-xs text-[#1D1D1F]">Área</Label><Select value={newField.area} onValueChange={(v) => setNewField({ ...newField, area: v })}><SelectTrigger className="mt-1 rounded-xl border-black/10"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl">{AREAS.map((a) => <SelectItem key={a.id} value={a.id}>{a.label}</SelectItem>)}</SelectContent></Select></div>
-                          <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={newField.required} onChange={(e) => setNewField({ ...newField, required: e.target.checked })} className="rounded" /><span className="text-xs text-[#1D1D1F]">Obligatorio</span></label>
+                          <div><Label className="text-xs text-foreground">Nombre</Label><Input placeholder="Ej: Número de Referencia" value={newField.label} onChange={(e) => setNewField({ ...newField, label: e.target.value })} className="mt-1 rounded-xl" /></div>
+                          <div><Label className="text-xs text-foreground">Tipo</Label><Select value={newField.fieldType} onValueChange={(v) => setNewField({ ...newField, fieldType: v })}><SelectTrigger className="mt-1 rounded-xl"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl"><SelectItem value="text">Texto</SelectItem><SelectItem value="textarea">Texto largo</SelectItem><SelectItem value="number">Número</SelectItem><SelectItem value="date">Fecha</SelectItem><SelectItem value="evidence">Evidencia (foto/documento)</SelectItem></SelectContent></Select></div>
+                          <div><Label className="text-xs text-foreground">Área</Label><Select value={newField.area} onValueChange={(v) => setNewField({ ...newField, area: v })}><SelectTrigger className="mt-1 rounded-xl"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl">{AREAS.map((a) => <SelectItem key={a.id} value={a.id}>{a.label}</SelectItem>)}</SelectContent></Select></div>
+                          <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={newField.required} onChange={(e) => setNewField({ ...newField, required: e.target.checked })} className="rounded" /><span className="text-xs text-foreground">Obligatorio</span></label>
                           <Button onClick={handleAddField} disabled={!newField.label.trim()} className="w-full h-10 rounded-xl bg-[#007AFF] text-white hover:bg-[#0066E0]"><Plus className="mr-1.5 h-4 w-4" />Agregar</Button>
                         </div>
                       </DialogContent>
@@ -600,8 +600,8 @@ export function WorkflowDetail() {
                   </AnimatePresence>
                   {areaFields.length === 0 && (
                     <div className="flex flex-col items-center py-12 text-center">
-                      <FileText className="mb-3 h-10 w-10 text-[#C7C7CC]" />
-                      <p className="text-sm font-medium text-[#86868B]">Sin campos en esta área</p>
+                      <FileText className="mb-3 h-10 w-10 text-muted-foreground/30" />
+                      <p className="text-sm font-medium text-muted-foreground">Sin campos en esta área</p>
                     </div>
                   )}
                 </div>
@@ -656,7 +656,7 @@ export function WorkflowDetail() {
                     const done = completedAreas.includes(dep.id);
                     const DepIcon = ICON_MAP[dep.icon] || Settings;
                     return (
-                      <button key={dep.id} onClick={() => setActiveArea(dep.id)} className="w-full rounded-xl p-2.5 text-left transition-all hover:bg-[#F5F5F7]">
+                      <button key={dep.id} onClick={() => setActiveArea(dep.id)} className="w-full rounded-xl p-2.5 text-left transition-all hover:bg-accent">
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <DepIcon className="h-3.5 w-3.5" style={{ color: dep.color }} />
