@@ -614,15 +614,15 @@ export function WorkflowDetail() {
             {/* Current Area & User Info */}
             <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4 space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868B]">Estado Actual</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Estado Actual</h3>
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full" style={{ backgroundColor: currentAreaInfo?.color }} />
-                  <span className="text-sm font-medium text-[#1D1D1F]">
+                  <span className="text-sm font-medium text-foreground">
                     Área: {AREA_LABEL_MAP[workflow.currentArea]}
                   </span>
                 </div>
                 {user && (
-                  <div className="flex items-center gap-2 text-xs text-[#86868B]">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Users className="h-3.5 w-3.5" />
                     <span>Usuario: {user.name} ({AREA_LABEL_MAP[user.area]})</span>
                   </div>
@@ -638,8 +638,8 @@ export function WorkflowDetail() {
             {/* Actions */}
             <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4 space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[#86868B]">Acciones</h3>
-                <Button variant="outline" className="w-full rounded-xl border-black/10 bg-white justify-start text-[#1D1D1F] hover:bg-[#F5F5F7]" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")}>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Acciones</h3>
+                <Button variant="outline" className="w-full rounded-xl border-border bg-card justify-start text-foreground hover:bg-accent" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")}>
                   <Download className="mr-2 h-4 w-4" />Descargar Word
                 </Button>
               </CardContent>
@@ -648,7 +648,7 @@ export function WorkflowDetail() {
             {/* Dependencies Status */}
             <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4">
-                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868B]">Estado de Dependencias</h3>
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Estado de Dependencias</h3>
                 <div className="space-y-1.5">
                   {DEPENDENCIES.map((dep) => {
                     const depFields = getAreaFields(dep.id);
@@ -660,13 +660,13 @@ export function WorkflowDetail() {
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <DepIcon className="h-3.5 w-3.5" style={{ color: dep.color }} />
-                            <span className="text-xs font-medium text-[#1D1D1F]">{dep.label}</span>
+                            <span className="text-xs font-medium text-foreground">{dep.label}</span>
                           </div>
                           {done && <CheckCircle2 className="h-3.5 w-3.5 text-[#34C759]" />}
                         </div>
                         <div className="flex items-center gap-2">
                           <Progress value={completion} className="h-1 flex-1" />
-                          <span className="text-[10px] text-[#86868B] w-8 text-right">{completion}%</span>
+                          <span className="text-[10px] text-muted-foreground w-8 text-right">{completion}%</span>
                         </div>
                       </button>
                     );
@@ -679,7 +679,7 @@ export function WorkflowDetail() {
             {workflow.areaLogs && workflow.areaLogs.length > 0 && (
               <Card className="rounded-2xl border border-border bg-card shadow-sm">
                 <CardContent className="p-4">
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868B]">Historial</h3>
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Historial</h3>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {workflow.areaLogs.map((log) => {
                       const actionLabel = log.action === "FORWARDED" ? "Envio" : log.action === "ESCALATED" ? "Escalo" : log.action === "RETURNED" ? "Devuelve" : log.action;
@@ -688,8 +688,8 @@ export function WorkflowDetail() {
                         <div key={log.id} className="flex items-start gap-2">
                           <div className="mt-1 h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: actionColor }} />
                           <div>
-                            <p className="text-xs text-[#1D1D1F]"><strong>{AREA_LABEL_MAP[log.fromArea]}</strong> {actionLabel.toLowerCase()} a <strong>{AREA_LABEL_MAP[log.toArea]}</strong></p>
-                            <p className="text-[10px] text-[#86868B]">{new Date(log.createdAt).toLocaleString("es-CO")}</p>
+                            <p className="text-xs text-foreground"><strong>{AREA_LABEL_MAP[log.fromArea]}</strong> {actionLabel.toLowerCase()} a <strong>{AREA_LABEL_MAP[log.toArea]}</strong></p>
+                            <p className="text-[10px] text-muted-foreground">{new Date(log.createdAt).toLocaleString("es-CO")}</p>
                           </div>
                         </div>
                       );
@@ -702,11 +702,11 @@ export function WorkflowDetail() {
             {/* Info */}
             <Card className="rounded-2xl border border-border bg-card shadow-sm">
               <CardContent className="p-4">
-                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#86868B]">Info</h3>
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Info</h3>
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between"><span className="text-[#86868B]">Documento</span><span className="text-[#1D1D1F] truncate max-w-[150px]">{workflow.documentName}</span></div>
-                  <div className="flex justify-between"><span className="text-[#86868B]">Campos</span><span className="text-[#1D1D1F]">{workflow.fields.length}</span></div>
-                  <div className="flex justify-between"><span className="text-[#86868B]">Creado</span><span className="text-[#1D1D1F]">{new Date(workflow.createdAt).toLocaleDateString("es-CO")}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Documento</span><span className="text-foreground truncate max-w-[150px]">{workflow.documentName}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Campos</span><span className="text-foreground">{workflow.fields.length}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Creado</span><span className="text-foreground">{new Date(workflow.createdAt).toLocaleDateString("es-CO")}</span></div>
                 </div>
               </CardContent>
             </Card>
