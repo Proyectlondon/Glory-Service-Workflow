@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { sendWorkflowNotification } from "@/lib/mail";
 
 export async function GET() {
   try {
@@ -56,6 +57,23 @@ export async function POST(request: NextRequest) {
         type: "area_change",
       },
     });
+
+    // Email notification: Notify Dispatcher
+    const dispatcherUser = await db.user.findFirst({
+      where: { area: "DISPATCHER", isActive: true },
+    });
+    
+    if (dispatcherUser) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      await sendWorkflowNotification({
+        to: dispatcherUser.email,
+        subject: `Nuevo Workflow Creado: ${workflow.name}`,
+        workflowName: workflow.name,
+        message: `Se ha creado el flujo de trabajo "${workflow.name}" y requiere tu atención en el área de Dispatcher.`,
+        actionLabel: "Gestionar Workflow",
+        actionUrl: `${appUrl}/dashboard?workflowId=${workflow.id}`
+      });
+    }
 
     return NextResponse.json(workflow, { status: 201 });
   } catch (error) {

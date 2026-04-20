@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { HUB_AREA, AREA_LABEL_MAP } from "@/lib/types";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@/lib/auth";
+import { sendWorkflowNotification } from "@/lib/mail";
 
 function getAuthUser(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");
@@ -153,12 +154,21 @@ export async function POST(
       },
     });
 
-    // Email notification: look up user for target area and log
+    // Email notification: look up user for target area and send real email
     const targetAreaUser = await db.user.findFirst({
       where: { area: targetArea, isActive: true },
     });
+    
     if (targetAreaUser) {
-      console.log(`📧 Notificación por email a ${targetAreaUser.email}: ${notifMessage}`);
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      await sendWorkflowNotification({
+        to: targetAreaUser.email,
+        subject: `Nuevo Workflow: ${workflow.name} asignado a ${AREA_LABEL_MAP[targetArea]}`,
+        workflowName: workflow.name,
+        message: notifMessage,
+        actionLabel: "Revisar Workflow",
+        actionUrl: `${appUrl}/dashboard?workflowId=${id}`
+      });
     }
 
     const updated = await db.workflow.findUnique({

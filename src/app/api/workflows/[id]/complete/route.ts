@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { AREA_LABEL_MAP } from "@/lib/types";
+import { sendWorkflowNotification } from "@/lib/mail";
 
 export async function POST(
   request: NextRequest,
@@ -48,6 +49,23 @@ export async function POST(
         type: "complete",
       },
     });
+
+    // Email notification: Notify admin or dispatcher
+    const adminUser = await db.user.findFirst({
+      where: { role: "admin", isActive: true },
+    });
+    
+    if (adminUser) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      await sendWorkflowNotification({
+        to: adminUser.email,
+        subject: `Workflow Finalizado: ${workflow.name}`,
+        workflowName: workflow.name,
+        message: `El flujo de trabajo "${workflow.name}" ha sido completado exitosamente por la Ejecutiva de Cuenta y está listo para descarga.`,
+        actionLabel: "Ver Resultado",
+        actionUrl: `${appUrl}/dashboard?workflowId=${id}`
+      });
+    }
 
     const updated = await db.workflow.findUnique({
       where: { id },
