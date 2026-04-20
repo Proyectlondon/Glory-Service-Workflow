@@ -2,13 +2,14 @@ import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = "glory-workflow-secret-key-2024";
+import { JWT_SECRET, logAuthError } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password } = body;
+
+    console.log(`Intento de inicio de sesión para: ${email}`);
 
     if (!email || !password) {
       return NextResponse.json(
@@ -17,8 +18,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await db.user.findUnique({ where: { email } });
+    // Attempt to find user
+    let user;
+    try {
+      user = await db.user.findUnique({ where: { email } });
+    } catch (dbError: any) {
+      logAuthError("Database connection during login", dbError);
+      return NextResponse.json(
+        { error: "Error de conexión con la base de datos", details: dbError.message },
+        { status: 503 }
+      );
+    }
+
     if (!user) {
+      console.log(`Usuario no encontrado: ${email}`);
       return NextResponse.json(
         { error: "Credenciales inválidas" },
         { status: 401 }
@@ -26,20 +39,24 @@ export async function POST(request: NextRequest) {
     }
 
     if (!user.isActive) {
+      console.log(`Usuario inactivo intentando entrar: ${email}`);
       return NextResponse.json(
         { error: "Usuario inactivo. Contacte al administrador." },
         { status: 403 }
       );
     }
 
+    // Verify password
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
+      console.log(`Contraseña incorrecta para: ${email}`);
       return NextResponse.json(
         { error: "Credenciales inválidas" },
         { status: 401 }
       );
     }
 
+    // Generate token using Centralized Secret
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, area: user.area },
       JWT_SECRET,
@@ -48,14 +65,16 @@ export async function POST(request: NextRequest) {
 
     const { password: _, ...userWithoutPassword } = user;
 
+    console.log(`Login exitoso: ${email}`);
+
     return NextResponse.json({
       user: userWithoutPassword,
       token,
     });
-  } catch (error) {
-    console.error("Error logging in:", error);
+  } catch (error: any) {
+    logAuthError("General Login Handler", error);
     return NextResponse.json(
-      { error: "Error al iniciar sesión" },
+      { error: "Error interno al iniciar sesión", details: error.message },
       { status: 500 }
     );
   }

@@ -1,9 +1,4 @@
-import { db } from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = "glory-workflow-secret-key-2024";
+import { JWT_SECRET } from "@/lib/auth";
 
 function authenticate(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");

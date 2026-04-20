@@ -2,8 +2,7 @@ import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { HUB_AREA, AREA_LABEL_MAP } from "@/lib/types";
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = "glory-workflow-secret-key-2024";
+import { JWT_SECRET } from "@/lib/auth";
 
 function getAuthUser(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");

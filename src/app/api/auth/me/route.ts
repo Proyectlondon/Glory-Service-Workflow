@@ -1,8 +1,7 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = "glory-workflow-secret-key-2024";
+import { JWT_SECRET } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,12 +14,21 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const decoded = jwt.verify(token, JWT_SECRET) as {
-      id: string;
-      email: string;
-      role: string;
-      area: string;
-    };
+    
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET) as {
+        id: string;
+        email: string;
+        role: string;
+        area: string;
+      };
+    } catch (jwtError) {
+      return NextResponse.json(
+        { error: "Sesión expirada o inválida" },
+        { status: 401 }
+      );
+    }
 
     const user = await db.user.findUnique({
       where: { id: decoded.id },
@@ -37,12 +45,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(userWithoutPassword);
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      return NextResponse.json(
-        { error: "Token inválido o expirado" },
-        { status: 401 }
-      );
-    }
     console.error("Error fetching user:", error);
     return NextResponse.json(
       { error: "Error al obtener usuario" },
