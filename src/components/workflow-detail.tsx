@@ -416,7 +416,7 @@ export function WorkflowDetail() {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")} className="rounded-full border-black/10 bg-white text-[#1D1D1F] hover:bg-[#F5F5F7]">
+            <Button variant="outline" size="sm" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")} className="rounded-full border-border bg-background text-foreground hover:bg-accent">
               <Download className="mr-1 h-3.5 w-3.5" /><span className="hidden sm:inline">Descargar</span>
             </Button>
             {canEdit && (
@@ -579,11 +579,11 @@ export function WorkflowDetail() {
                           </div>
                         </div>
                         {field.fieldType === "textarea" ? (
-                          <Textarea value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="min-h-[72px] resize-none rounded-xl border-black/10 bg-white" />
+                          <Textarea value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="min-h-[72px] resize-none rounded-xl border-border bg-background" />
                         ) : field.fieldType === "number" ? (
-                          <Input type="number" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="h-9 rounded-xl border-black/10 bg-white" />
+                          <Input type="number" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="h-9 rounded-xl border-border bg-background" />
                         ) : field.fieldType === "date" ? (
-                          <Input type="date" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} className="h-9 rounded-xl border-black/10 bg-white" />
+                          <Input type="date" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} className="h-9 rounded-xl border-border bg-background" />
                         ) : field.fieldType === "evidence" ? (
                           <EvidenceUpload
                             value={field.value}
@@ -591,7 +591,7 @@ export function WorkflowDetail() {
                             onChange={(v) => updateFieldValue(field.id, v)}
                           />
                         ) : (
-                          <Input value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="h-9 rounded-xl border-black/10 bg-white" />
+                          <Input value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="h-9 rounded-xl border-border bg-background" />
                         )}
                         {field.fieldType !== "evidence" && field.value?.trim() && <p className="mt-1.5 text-[10px] text-[#34C759] flex items-center gap-0.5"><CheckCircle2 className="h-3 w-3" />Diligenciado</p>}
                         {field.fieldType === "evidence" && field.value && <p className="mt-1.5 text-[10px] text-[#34C759] flex items-center gap-0.5"><CheckCircle2 className="h-3 w-3" />Evidencia adjunta</p>}
