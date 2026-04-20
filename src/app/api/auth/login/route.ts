@@ -18,10 +18,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Attempt to find user
+    // Attempt to find user by email or name
     let user;
     try {
-      user = await db.user.findUnique({ where: { email } });
+      user = await db.user.findFirst({
+        where: {
+          OR: [
+            { email: email },
+            { name: email } // In this context, 'email' is the input value from the UI
+          ]
+        }
+      });
     } catch (dbError: any) {
       logAuthError("Database connection during login", dbError);
       return NextResponse.json(
