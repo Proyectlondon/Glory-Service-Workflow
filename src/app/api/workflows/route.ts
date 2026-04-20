@@ -58,18 +58,27 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Email notification: Notify Dispatcher
-    const dispatcherUser = await db.user.findFirst({
-      where: { area: "DISPATCHER", isActive: true },
+    // Email notification: Notify all Dispatchers and Executive Accountants
+    const initialUsers = await db.user.findMany({
+      where: { 
+        OR: [
+          { area: "DISPATCHER" },
+          { area: "EXECUTIVE_ACCOUNTANT" }
+        ],
+        isActive: true 
+      },
+      select: { email: true }
     });
     
-    if (dispatcherUser) {
+    if (initialUsers.length > 0) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const recipientEmails = Array.from(new Set(initialUsers.map(u => u.email)));
+
       await sendWorkflowNotification({
-        to: dispatcherUser.email,
+        to: recipientEmails.join(", "),
         subject: `Nuevo Workflow Creado: ${workflow.name}`,
         workflowName: workflow.name,
-        message: `Se ha creado el flujo de trabajo "${workflow.name}" y requiere tu atención en el área de Dispatcher.`,
+        message: `Se ha creado el flujo de trabajo "${workflow.name}" y requiere atención en el área de Dispatcher.`,
         actionLabel: "Gestionar Workflow",
         actionUrl: `${appUrl}/dashboard?workflowId=${workflow.id}`
       });

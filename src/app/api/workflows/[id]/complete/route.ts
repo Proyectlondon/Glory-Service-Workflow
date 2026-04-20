@@ -50,15 +50,24 @@ export async function POST(
       },
     });
 
-    // Email notification: Notify admin or dispatcher
-    const adminUser = await db.user.findFirst({
-      where: { role: "admin", isActive: true },
+    // Email notification: Notify all Admins and Executive Accountants
+    const finalUsers = await db.user.findMany({
+      where: { 
+        OR: [
+          { role: "admin" },
+          { area: "EXECUTIVE_ACCOUNTANT" }
+        ],
+        isActive: true 
+      },
+      select: { email: true }
     });
     
-    if (adminUser) {
+    if (finalUsers.length > 0) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const recipientEmails = Array.from(new Set(finalUsers.map(u => u.email)));
+
       await sendWorkflowNotification({
-        to: adminUser.email,
+        to: recipientEmails.join(", "),
         subject: `Workflow Finalizado: ${workflow.name}`,
         workflowName: workflow.name,
         message: `El flujo de trabajo "${workflow.name}" ha sido completado exitosamente por la Ejecutiva de Cuenta y está listo para descarga.`,

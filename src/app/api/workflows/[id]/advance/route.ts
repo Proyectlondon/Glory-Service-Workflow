@@ -154,16 +154,26 @@ export async function POST(
       },
     });
 
-    // Email notification: look up user for target area and send real email
-    const targetAreaUser = await db.user.findFirst({
-      where: { area: targetArea, isActive: true },
+    // Email notification: look up all users for target area AND Executive Accountants
+    const targetUsers = await db.user.findMany({
+      where: { 
+        OR: [
+          { area: targetArea },
+          { area: HUB_AREA }
+        ],
+        isActive: true 
+      },
+      select: { email: true }
     });
     
-    if (targetAreaUser) {
+    if (targetUsers.length > 0) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      // Extract unique emails
+      const recipientEmails = Array.from(new Set(targetUsers.map(u => u.email)));
+      
       await sendWorkflowNotification({
-        to: targetAreaUser.email,
-        subject: `Nuevo Workflow: ${workflow.name} asignado a ${AREA_LABEL_MAP[targetArea]}`,
+        to: recipientEmails.join(", "), // Resend accepts comma separated strings
+        subject: `Actualización: ${workflow.name} asignado a ${AREA_LABEL_MAP[targetArea]}`,
         workflowName: workflow.name,
         message: notifMessage,
         actionLabel: "Revisar Workflow",
