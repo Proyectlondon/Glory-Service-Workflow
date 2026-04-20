@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       const recipientEmails = Array.from(new Set(initialUsers.map(u => u.email)));
 
       await sendWorkflowNotification({
-        to: recipientEmails.join(", "),
+        to: recipientEmails,
         subject: `Nuevo Workflow Creado: ${workflow.name}`,
         workflowName: workflow.name,
         message: `Se ha creado el flujo de trabajo "${workflow.name}" y requiere atención en el área de Dispatcher.`,

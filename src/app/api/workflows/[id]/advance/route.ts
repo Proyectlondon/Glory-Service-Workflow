@@ -166,13 +166,16 @@ export async function POST(
       select: { email: true }
     });
     
+    console.log(`🔍 Búsqueda de destinatarios para área ${targetArea}: se encontraron ${targetUsers.length} usuarios.`);
+    
     if (targetUsers.length > 0) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
       // Extract unique emails
       const recipientEmails = Array.from(new Set(targetUsers.map(u => u.email)));
+      console.log(`📧 Lista final de correos a notificar: ${recipientEmails.join(", ")}`);
       
       await sendWorkflowNotification({
-        to: recipientEmails.join(", "), // Resend accepts comma separated strings
+        to: recipientEmails, // Send as array for better compatibility
         subject: `Actualización: ${workflow.name} asignado a ${AREA_LABEL_MAP[targetArea]}`,
         workflowName: workflow.name,
         message: notifMessage,

@@ -67,7 +67,7 @@ export async function POST(
       const recipientEmails = Array.from(new Set(finalUsers.map(u => u.email)));
 
       await sendWorkflowNotification({
-        to: recipientEmails.join(", "),
+        to: recipientEmails,
         subject: `Workflow Finalizado: ${workflow.name}`,
         workflowName: workflow.name,
         message: `El flujo de trabajo "${workflow.name}" ha sido completado exitosamente por la Ejecutiva de Cuenta y está listo para descarga.`,
