@@ -1,3 +1,7 @@
+import { db } from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@/lib/auth";
 
 function authenticate(request: NextRequest) {
