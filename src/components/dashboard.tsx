@@ -17,6 +17,7 @@ import {
   LogOut,
   User as UserIcon,
   Shield,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { UploadZone } from "./upload-zone";
 import { UserManagement } from "./user-management";
+import { TemplateManagement } from "./template-management";
 import { ThemeToggle } from "./theme-toggle";
 
 export function Dashboard() {
@@ -215,6 +217,10 @@ export function Dashboard() {
                       <UserIcon className="mr-2 h-4 w-4" />
                       Gestionar Usuarios
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCurrentView("templates")} className="cursor-pointer">
+                      <Layers className="mr-2 h-4 w-4" />
+                      Gestionar Plantillas
+                    </DropdownMenuItem>
                   </>
                 )}
                 <DropdownMenuSeparator />
@@ -232,6 +238,10 @@ export function Dashboard() {
         {currentView === "users" ? (
           <div className="animate-in fade-in duration-500">
             <UserManagement />
+          </div>
+        ) : currentView === "templates" ? (
+          <div className="animate-in fade-in duration-500">
+            <TemplateManagement />
           </div>
         ) : (
           <>

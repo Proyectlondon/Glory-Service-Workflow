@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type AppView = "landing" | "dashboard" | "workflow-detail" | "notifications" | "users";
+export type AppView = "landing" | "dashboard" | "workflow-detail" | "notifications" | "users" | "templates";
 
 export interface WorkflowField {
   id: string;
