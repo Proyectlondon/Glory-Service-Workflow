@@ -1,76 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
 import mammoth from "mammoth";
 
+// Heuristics para asignar área y tipo de campo
+const KEYWORDS_TO_AREA: Record<string, string> = {
+  "nombre": "DISPATCHER",
+  "correo": "DISPATCHER",
+  "fecha": "DISPATCHER",
+  "descripcion": "EXECUTIVE_ACCOUNTANT",
+  "cliente": "EXECUTIVE_ACCOUNTANT",
+  "cuenta": "EXECUTIVE_ACCOUNTANT",
+  "prioridad": "EXECUTIVE_ACCOUNTANT",
+  "valor": "EXECUTIVE_ACCOUNTANT",
+  "costo": "FINANCE",
+  "factura": "FINANCE",
+  "requisito": "OPERATIONS",
+  "entrega": "OPERATIONS",
+  "legal": "LEGAL",
+  "ley": "LEGAL",
+  "recurso": "IT",
+  "tecnico": "IT",
+  "proveedor": "SUPPLY_CHAIN",
+  "cadena": "SUPPLY_CHAIN",
+  "soporte": "SERVICE_SUPPORT",
+  "observacion": "SERVICE_SUPPORT"
+};
+
+function assignAreaByLabel(label: string): string {
+  const normalized = label.toLowerCase();
+  for (const [key, area] of Object.entries(KEYWORDS_TO_AREA)) {
+    if (normalized.includes(key)) {
+      return area;
+    }
+  }
+  return "DISPATCHER"; // default
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: "No se ha subido ningún archivo" }, { status: 400 });
+      return NextResponse.json({ error: "No file uploadeado" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Extraction using mammoth
+    // Extract raw text using mammoth
     const { value: text } = await mammoth.extractRawText({ buffer });
-    
-    // Logic to detect fields: looks for [Field Name] or [Field: Area]
-    // Example regex: /\[([^\]]+)\]/g
-    const fieldRegex = /\[([^\]]+)\]/g;
-    const matches = [...text.matchAll(fieldRegex)];
-    
-    const fields = matches.map((match, index) => {
-      const fullContent = match[1].trim();
-      let label = fullContent;
-      let area = "DISPATCHER";
-      let fieldType = "text";
 
-      // Basic heuristic: if it looks like a number search
-      if (label.toLowerCase().includes("valor") || label.toLowerCase().includes("monto")) {
-        fieldType = "number";
-      } else if (label.toLowerCase().includes("fecha")) {
-        fieldType = "date";
-      } else if (label.length > 50) {
-        fieldType = "textarea";
-      }
+    // Encontrar placeholders en formato {{Nombre del Campo}}
+    const regex = /\{\{([^}]+)\}\}/g;
+    const matches = new Set<string>();
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      matches.add(match[1].trim());
+    }
 
-      // Assign areas based on keywords
-      const lowerLabel = label.toLowerCase();
-      if (lowerLabel.includes("financiera") || lowerLabel.includes("pago") || lowerLabel.includes("costo")) {
-        area = "FINANCE";
-      } else if (lowerLabel.includes("operativa") || lowerLabel.includes("logística")) {
-        area = "OPERATIONS";
-      } else if (lowerLabel.includes("legal") || lowerLabel.includes("contrato")) {
-        area = "LEGAL";
-      } else if (lowerLabel.includes("técnica") || lowerLabel.includes("it") || lowerLabel.includes("sistema")) {
-        area = "IT";
-      } else if (lowerLabel.includes("ejecutiva") || lowerLabel.includes("cuenta")) {
-        area = "EXECUTIVE_ACCOUNTANT";
-      }
-
-      return {
-        label,
-        value: "",
-        fieldType,
-        area,
-        required: false,
-        orderIndex: index
-      };
-    });
+    const extractedFields = Array.from(matches).map((label, index) => ({
+      label,
+      value: "",
+      fieldType: label.toLowerCase().includes("fecha") ? "date" : label.toLowerCase().includes("valor") || label.toLowerCase().includes("costo") ? "number" : "text",
+      area: assignAreaByLabel(label),
+      required: true,
+      orderIndex: index
+    }));
 
     return NextResponse.json({
-      documentData: text,
-      fields: fields,
-      documentName: file.name
-    });
+      fields: extractedFields,
+      documentData: buffer.toString("base64")
+    }, { status: 200 });
 
-  } catch (error: any) {
-    console.error("Error procesando Word:", error);
-    return NextResponse.json(
-      { error: "Error al procesar el documento Word", details: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("Error processing document:", error);
+    return NextResponse.json({ error: "Error al procesar el documento Word." }, { status: 500 });
   }
 }

@@ -106,7 +106,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C7C7CC]" />
                   <Input
                     type="text"
-                    placeholder="ej: admin o correo@glory.com"
+                    placeholder="ej: correo@glory.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={handleKeyDown}

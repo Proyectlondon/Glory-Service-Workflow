@@ -74,3 +74,11 @@ model AreaLog {
 
   workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
 }
+
+model Template {
+  id        String   @id @default(cuid())
+  name      String
+  fields    Json     // Almacena la estructura de campos [ {label, area, fieldType, ...} ]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

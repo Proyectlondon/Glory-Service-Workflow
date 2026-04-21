@@ -216,6 +216,7 @@ export function WorkflowDetail() {
   const [editingName, setEditingName] = useState(false);
   const [workflowName, setWorkflowName] = useState("");
   const [escalateMenuOpen, setEscalateMenuOpen] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   const fetchWorkflow = useCallback(async () => {
     if (!selectedWorkflowId) return;
@@ -375,6 +376,27 @@ export function WorkflowDetail() {
       }
     } catch { /* */ }
     finally { setSaving(false); }
+  };
+
+  const handleSaveAsTemplate = async () => {
+    if (!workflow) return;
+    setSavingTemplate(true);
+    try {
+      const res = await fetch("/api/templates", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ name: `Plantilla de ${workflow.name}`, fields: workflow.fields })
+      });
+      if (res.ok) {
+        toast.success("Plantilla guardada con éxito");
+      } else {
+        toast.error("Error al guardar plantilla");
+      }
+    } catch {
+      toast.error("Error de conexión");
+    } finally {
+      setSavingTemplate(false);
+    }
   };
 
   if (isLoading || !workflow) return (
@@ -642,6 +664,12 @@ export function WorkflowDetail() {
                 <Button variant="outline" className="w-full rounded-xl border-border bg-card justify-start text-foreground hover:bg-accent" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")}>
                   <Download className="mr-2 h-4 w-4" />Descargar Word
                 </Button>
+                {canEdit && (
+                  <Button variant="outline" disabled={savingTemplate} className="w-full rounded-xl border-border bg-card justify-start text-foreground hover:bg-accent" onClick={handleSaveAsTemplate}>
+                    {savingTemplate ? <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" /> : <Save className="mr-2 h-4 w-4" />}
+                    Guardar como Plantilla
+                  </Button>
+                )}
               </CardContent>
             </Card>
 

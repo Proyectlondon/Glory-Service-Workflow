@@ -36,6 +36,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { UploadZone } from "./upload-zone";
 import { UserManagement } from "./user-management";
@@ -503,6 +510,25 @@ export function Dashboard() {
 function ManualCreateForm({ onCreate }: { onCreate: (name: string, fields: any[]) => void }) {
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("default");
+
+  useEffect(() => {
+    fetch("/api/templates")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setTemplates(data);
+        } else {
+          console.error("API did not return an array", data);
+          setTemplates([]);
+        }
+      })
+      .catch(err => {
+        console.error("Error loading templates", err);
+        setTemplates([]);
+      });
+  }, []);
 
   const defaultFields = [
     { label: "Nombre del Solicitante", value: "", fieldType: "text", area: "DISPATCHER", required: true },
@@ -525,12 +551,41 @@ function ManualCreateForm({ onCreate }: { onCreate: (name: string, fields: any[]
   const handleCreate = async () => {
     if (!name.trim()) return;
     setCreating(true);
-    await onCreate(name.trim(), defaultFields);
+    let fieldsToUse = defaultFields;
+    
+    if (selectedTemplate !== "default") {
+      const template = templates.find(t => t.id === selectedTemplate);
+      if (template && template.fields) {
+        // Assign the template fields
+        fieldsToUse = template.fields;
+      }
+    }
+
+    await onCreate(name.trim(), fieldsToUse);
     setCreating(false);
   };
 
+  const selectedFieldsCount = selectedTemplate === "default" 
+    ? 15 
+    : (templates.find(t => t.id === selectedTemplate)?.fields?.length || 0);
+
   return (
     <div className="space-y-4 pt-2">
+      <div>
+        <label className="text-sm font-medium text-foreground">Plantilla base</label>
+        <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+          <SelectTrigger className="mt-1.5 h-10 rounded-xl border-border bg-background">
+            <SelectValue placeholder="Seleccionar plantilla" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="default">Vía Estándar (15 campos)</SelectItem>
+            {templates.map(t => (
+              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div>
         <label className="text-sm font-medium text-foreground">Nombre del Flujo</label>
         <Input
@@ -541,7 +596,7 @@ function ManualCreateForm({ onCreate }: { onCreate: (name: string, fields: any[]
         />
       </div>
       <p className="text-xs text-muted-foreground">
-        Se crearán <span className="font-medium text-foreground">15 campos</span> distribuidos entre Dispatcher, Ejecutiva de Cuenta y las dependencias.
+        Se crearán <span className="font-medium text-foreground">{selectedFieldsCount} campos</span> {selectedTemplate === "default" ? "distribuidos entre Dispatcher, Ejecutiva de Cuenta y las dependencias." : `basados en la plantilla "${templates.find(t => t.id === selectedTemplate)?.name}".`}
       </p>
       <Button
         onClick={handleCreate}

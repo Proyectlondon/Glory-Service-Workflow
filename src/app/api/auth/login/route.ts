@@ -53,14 +53,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify password
-    const isValid = await bcrypt.compare(password, user.password);
+    // Verify password: Check if it's bcrypt hashed or plain text
+    let isValid = false;
+    let needsHashing = false;
+
+    if (user.password.startsWith("$2a$") || user.password.startsWith("$2b$")) {
+      isValid = await bcrypt.compare(password, user.password);
+    } else {
+      // Plain text check (for manually created users)
+      isValid = (password === user.password);
+      if (isValid) {
+        needsHashing = true;
+      }
+    }
+
     if (!isValid) {
       console.log(`Contraseña incorrecta para: ${email}`);
       return NextResponse.json(
         { error: "Credenciales inválidas" },
         { status: 401 }
       );
+    }
+
+    // Hash the password if it was plain text and store it securely
+    if (needsHashing) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.user.update({
+        where: { id: user.id },
+        data: { password: hashedPassword }
+      });
+      console.log(`Contraseña de ${email} encriptada y migrada exitosamente.`);
     }
 
     // Generate token using Centralized Secret
