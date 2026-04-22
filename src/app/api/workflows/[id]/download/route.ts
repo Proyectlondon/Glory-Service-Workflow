@@ -19,6 +19,7 @@ import {
   Footer,
   PageNumber,
   VerticalAlign,
+  TextBreak,
 } from "docx";
 import { CORPORATE_LOGO_BASE64 } from "@/lib/logo_base64";
 
@@ -96,7 +97,7 @@ export async function GET(
                       children: [
                         new ImageRun({
                           data: Buffer.from(CORPORATE_LOGO_BASE64, "base64"),
-                          transformation: { width: 120, height: 40 },
+                          transformation: { width: 100, height: 35 },
                         }),
                       ],
                     }),
@@ -254,15 +255,16 @@ export async function GET(
               new TableCell({
                 children: [
                   new Paragraph({
-                    children: [
+                    children: displayValue.split("\n").flatMap((part, i, arr) => [
                       new TextRun({
-                        text: displayValue,
+                        text: part,
                         size: 18,
                         font: "Arial",
                         color: hasValue ? "000000" : "999999",
                         italics: !hasValue,
                       }),
-                    ],
+                      i < arr.length - 1 ? new TextBreak() : undefined,
+                    ]).filter((run): run is TextRun | TextBreak => run !== undefined),
                   }),
                 ],
                 verticalAlign: VerticalAlign.CENTER,
@@ -309,9 +311,9 @@ export async function GET(
           alignment: AlignmentType.CENTER,
           children: [
             new TextRun({ text: "Página ", size: 16, font: "Arial", color: "888888" }),
-            new TextRun({ children: [PageNumber.CURRENT], size: 16, font: "Arial", color: "888888" }),
+            PageNumber.CURRENT,
             new TextRun({ text: " de ", size: 16, font: "Arial", color: "888888" }),
-            new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, font: "Arial", color: "888888" }),
+            PageNumber.TOTAL_PAGES,
           ],
         }),
       ],
