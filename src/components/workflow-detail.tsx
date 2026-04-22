@@ -120,7 +120,7 @@ function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled
         {evidence.isImage ? (
           <button
             onClick={() => setPreviewOpen(true)}
-            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-black/10 bg-[#F5F5F7] transition-all hover:shadow-md"
+            className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-muted transition-all hover:shadow-md"
           >
             <img src={evidence.url} alt={evidence.name} className="h-full w-full object-cover" suppressHydrationWarning />
             <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/20">
@@ -152,14 +152,14 @@ function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="relative max-h-[85vh] max-w-[85vw] rounded-2xl bg-white p-2 shadow-2xl"
+              className="relative max-h-[85vh] max-w-[85vw] rounded-2xl bg-card p-2 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <img src={evidence.url} alt={evidence.name} className="max-h-[80vh] max-w-[80vw] rounded-xl object-contain" suppressHydrationWarning />
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-white shadow-md hover:bg-[#F5F5F7]"
+                className="absolute -right-2 -top-2 h-7 w-7 rounded-full bg-card shadow-md hover:bg-muted"
                 onClick={() => setPreviewOpen(false)}
               >
                 <X className="h-4 w-4" />
@@ -180,7 +180,7 @@ function EvidenceUpload({ value, disabled, onChange }: { value: string; disabled
       <button
         onClick={() => !disabled && fileRef.current?.click()}
         disabled={disabled || uploading}
-        className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#E5E5EA] bg-[#FAFAFA] px-4 py-4 text-sm transition-all ${
+        className={`flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/30 px-4 py-4 text-sm transition-all ${
           disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:border-[#007AFF] hover:bg-[#007AFF]/4"
         }`}
       >
@@ -203,6 +203,27 @@ function getAuthHeaders(): Record<string, string> {
   const token = useAppStore.getState().token;
   return token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" };
 }
+
+const isCurrencyField = (label: string) => {
+  const currencyKeywords = ["costo", "precio", "valor", "total", "iva", "subtotal", "monto", "pago", "presupuesto"];
+  return currencyKeywords.some((keyword) => label.toLowerCase().includes(keyword));
+};
+
+const formatCurrencyUI = (val: string) => {
+  if (!val) return "";
+  // Limpiar y parsear el valor numérico
+  const numericValue = parseFloat(val.replace(/[^\d]/g, ""));
+  if (isNaN(numericValue)) return val;
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
+    .format(numericValue)
+    .replace("COP", "$")
+    .trim();
+};
 
 export function WorkflowDetail() {
   const { selectedWorkflowId, setCurrentView, updateWorkflowInList, isLoading, setIsLoading, user } = useAppStore();
@@ -421,7 +442,7 @@ export function WorkflowDetail() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-3">
-          <Button variant="ghost" size="icon" className="rounded-full hover:bg-black/5" onClick={() => setCurrentView("dashboard")}>
+          <Button variant="ghost" size="icon" className="rounded-full hover:bg-accent" onClick={() => setCurrentView("dashboard")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1 min-w-0">
@@ -491,7 +512,7 @@ export function WorkflowDetail() {
                         </DropdownMenuItem>
                       );
                     })}
-                    <div className="my-1 border-t border-black/5" />
+                    <div className="my-1 border-t border-border" />
                     <DropdownMenuItem onClick={() => { setEscalateMenuOpen(false); handleComplete(); }} className="py-2.5 cursor-pointer text-[#34C759]">
                       <CheckCircle2 className="mr-2.5 h-4 w-4" />
                       <span className="flex-1">Completar Formato</span>
@@ -602,8 +623,25 @@ export function WorkflowDetail() {
                         </div>
                         {field.fieldType === "textarea" ? (
                           <Textarea value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="min-h-[72px] resize-none rounded-xl border-border bg-background" />
-                        ) : field.fieldType === "number" ? (
-                          <Input type="number" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} placeholder={`Ingrese ${field.label.toLowerCase()}...`} className="h-9 rounded-xl border-border bg-background" />
+                        ) : field.fieldType === "number" || (field.fieldType === "text" && isCurrencyField(field.label)) ? (
+                          <div className="relative">
+                            <Input
+                              type={isCurrencyField(field.label) ? "text" : "number"}
+                              value={isCurrencyField(field.label) ? formatCurrencyUI(field.value) : field.value}
+                              onChange={(e) => {
+                                const rawValue = isCurrencyField(field.label) 
+                                  ? e.target.value.replace(/[^\d]/g, "")
+                                  : e.target.value;
+                                updateFieldValue(field.id, rawValue);
+                              }}
+                              disabled={!canEdit}
+                              placeholder={`Ingrese ${field.label.toLowerCase()}...`}
+                              className={`h-9 rounded-xl border-border bg-background ${isCurrencyField(field.label) ? "pl-8" : ""}`}
+                            />
+                            {isCurrencyField(field.label) && (
+                              <DollarSign className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
+                            )}
+                          </div>
                         ) : field.fieldType === "date" ? (
                           <Input type="date" value={field.value} onChange={(e) => updateFieldValue(field.id, e.target.value)} disabled={!canEdit} className="h-9 rounded-xl border-border bg-background" />
                         ) : field.fieldType === "evidence" ? (
