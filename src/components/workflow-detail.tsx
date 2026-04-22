@@ -205,20 +205,30 @@ function getAuthHeaders(): Record<string, string> {
 }
 
 const isCurrencyField = (label: string) => {
-  const currencyKeywords = ["costo", "precio", "valor", "total", "iva", "subtotal", "monto", "pago", "presupuesto"];
-  return currencyKeywords.some((keyword) => label.toLowerCase().includes(keyword));
+  if (!label) return false;
+  const currencyKeywords = [
+    "costo", "precio", "valor", "total", "iva", "subtotal", "monto", 
+    "pago", "presupuesto", "tarifa", "cuota", "honorarios"
+  ];
+  // Normalizar para quitar tildes y caracteres especiales
+  const normalizedLabel = label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return currencyKeywords.some((keyword) => normalizedLabel.includes(keyword));
 };
 
 const formatCurrencyUI = (val: string) => {
-  if (!val) return "";
-  // Limpiar y parsear el valor numérico
-  const numericValue = parseFloat(val.replace(/[^\d]/g, ""));
+  if (!val || val === "(Sin diligenciar)") return "";
+  
+  // Extraer solo números y punto decimal
+  const cleanValue = val.toString().replace(/[^\d.,]/g, "").replace(",", ".");
+  const numericValue = parseFloat(cleanValue);
+  
   if (isNaN(numericValue)) return val;
+  
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
     currency: "COP",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 0, // Generalmente COP no usa decimales, pero el formateador los manejará si se requiere
   })
     .format(numericValue)
     .replace("COP", "$")

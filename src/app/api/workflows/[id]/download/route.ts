@@ -23,13 +23,18 @@ import {
 import { CORPORATE_LOGO_BASE64 } from "@/lib/logo_base64";
 
 const formatCurrency = (value: string, label: string) => {
-  const currencyKeywords = ["costo", "precio", "valor", "total", "iva", "subtotal", "monto", "pago", "presupuesto"];
-  const isCurrency = currencyKeywords.some((keyword) => label.toLowerCase().includes(keyword));
+  if (!label) return value;
+  const currencyKeywords = [
+    "costo", "precio", "valor", "total", "iva", "subtotal", "monto", 
+    "pago", "presupuesto", "tarifa", "cuota", "honorarios"
+  ];
+  const normalizedLabel = label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const isCurrency = currencyKeywords.some((keyword) => normalizedLabel.includes(keyword));
 
   if (!isCurrency || !value || value.trim() === "" || value === "(Sin diligenciar)") return value;
 
   // Limpiar el valor de caracteres no numéricos
-  const cleanValue = value.replace(/[^\d]/g, "");
+  const cleanValue = value.toString().replace(/[^\d.,]/g, "").replace(",", ".");
   const numericValue = parseFloat(cleanValue);
 
   if (isNaN(numericValue)) return value;
