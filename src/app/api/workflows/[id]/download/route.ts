@@ -14,7 +14,36 @@ import {
   WidthType,
   ShadingType,
   Packer,
+  ImageRun,
+  Header,
+  Footer,
+  PageNumber,
+  VerticalAlign,
 } from "docx";
+import { CORPORATE_LOGO_BASE64 } from "@/lib/logo_base64";
+
+const formatCurrency = (value: string, label: string) => {
+  const currencyKeywords = ["costo", "precio", "valor", "total", "iva", "subtotal", "monto", "pago"];
+  const isCurrency = currencyKeywords.some((keyword) => label.toLowerCase().includes(keyword));
+
+  if (!isCurrency || !value || value.trim() === "" || value === "(Sin diligenciar)") return value;
+
+  // Limpiar el valor de caracteres no numéricos
+  const cleanValue = value.replace(/[^\d]/g, "");
+  const numericValue = parseFloat(cleanValue);
+
+  if (isNaN(numericValue)) return value;
+
+  return new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
+    .format(numericValue)
+    .replace("COP", "$")
+    .trim();
+};
 
 export async function GET(
   _request: NextRequest,
@@ -40,35 +69,95 @@ export async function GET(
 
     const children: (Paragraph | Table)[] = [];
 
+    // Header Content
+    const header = new Header({
+      children: [
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: {
+            top: { style: BorderStyle.NONE },
+            bottom: { style: BorderStyle.SINGLE, size: 6, color: "1E3A5F" },
+            left: { style: BorderStyle.NONE },
+            right: { style: BorderStyle.NONE },
+          },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  width: { size: 30, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new ImageRun({
+                          data: Buffer.from(CORPORATE_LOGO_BASE64, "base64"),
+                          transformation: { width: 120, height: 40 },
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  width: { size: 70, type: WidthType.PERCENTAGE },
+                  verticalAlign: VerticalAlign.CENTER,
+                  children: [
+                    new Paragraph({
+                      alignment: AlignmentType.RIGHT,
+                      children: [
+                        new TextRun({
+                          text: "GLORY GLOBAL SOLUTIONS (COLOMBIA)",
+                          bold: true,
+                          size: 20,
+                          color: "1E3A5F",
+                          font: "Arial",
+                        }),
+                      ],
+                    }),
+                    new Paragraph({
+                      alignment: AlignmentType.RIGHT,
+                      children: [
+                        new TextRun({
+                          text: `COTIZACIÓN: ${workflow.id.slice(-8).toUpperCase()}`,
+                          bold: true,
+                          size: 18,
+                          color: "666666",
+                          font: "Arial",
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    });
+
+    // Body Title
     children.push(
       new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 400, after: 400 },
         children: [
           new TextRun({
-            text: workflow.name,
+            text: workflow.name.toUpperCase(),
             bold: true,
-            size: 36,
+            size: 32,
             color: "1E3A5F",
-            font: "Calibri",
+            font: "Arial",
           }),
         ],
-        heading: HeadingLevel.TITLE,
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 200 },
       })
     );
 
+    // Metadata Section
     children.push(
       new Paragraph({
         children: [
-          new TextRun({
-            text: `Formato de Servicio - Estado: ${workflow.status === "COMPLETED" ? "COMPLETADO" : "EN PROGRESO"}`,
-            size: 22,
-            color: "007AFF",
-            font: "Calibri",
-            italics: true,
-          }),
+          new TextRun({ text: "Fecha: ", bold: true, font: "Arial", size: 20 }),
+          new TextRun({ text: new Date().toLocaleDateString("es-CO", { day: 'numeric', month: 'long', year: 'numeric' }), font: "Arial", size: 20 }),
         ],
-        alignment: AlignmentType.CENTER,
         spacing: { after: 100 },
       })
     );
@@ -76,28 +165,19 @@ export async function GET(
     children.push(
       new Paragraph({
         children: [
-          new TextRun({
-            text: `Fecha de generación: ${new Date().toLocaleDateString("es-CO")}`,
-            size: 20,
-            color: "888888",
-            font: "Calibri",
+          new TextRun({ text: "Estado: ", bold: true, font: "Arial", size: 20 }),
+          new TextRun({ 
+            text: workflow.status === "COMPLETED" ? "COMPLETADO" : "EN PROGRESO", 
+            color: workflow.status === "COMPLETED" ? "007AFF" : "FF9500",
+            font: "Arial", 
+            size: 20 
           }),
         ],
-        alignment: AlignmentType.CENTER,
         spacing: { after: 400 },
       })
     );
 
-    children.push(
-      new Paragraph({
-        children: [new TextRun({ text: "", break: 1 })],
-        border: {
-          bottom: { style: BorderStyle.SINGLE, size: 6, color: "1E3A5F" },
-        },
-        spacing: { after: 300 },
-      })
-    );
-
+    // Sections by Area
     for (const areaId of areas) {
       const areaFields = fieldsByArea.get(areaId);
       if (!areaFields || areaFields.length === 0) continue;
@@ -108,20 +188,16 @@ export async function GET(
         new Paragraph({
           children: [
             new TextRun({
-              text: `AREA: ${areaLabel}`,
+              text: areaLabel.toUpperCase(),
               bold: true,
-              size: 26,
+              size: 24,
               color: "FFFFFF",
-              font: "Calibri",
+              font: "Arial",
             }),
           ],
-          heading: HeadingLevel.HEADING_1,
-          shading: {
-            type: ShadingType.SOLID,
-            color: "1E3A5F",
-            fill: "1E3A5F",
-          },
+          shading: { type: ShadingType.SOLID, color: "1E3A5F", fill: "1E3A5F" },
           spacing: { before: 300, after: 200 },
+          indent: { left: 100 },
         })
       );
 
@@ -130,19 +206,16 @@ export async function GET(
           tableHeader: true,
           children: [
             new TableCell({
-              children: [new Paragraph({ children: [new TextRun({ text: "Campo", bold: true, size: 20, font: "Calibri" })] })],
-              shading: { type: ShadingType.SOLID, color: "E8EDF2", fill: "E8EDF2" },
+              children: [new Paragraph({ children: [new TextRun({ text: "CAMPO", bold: true, size: 18, font: "Arial", color: "444444" })] })],
+              shading: { type: ShadingType.SOLID, color: "F5F7F9", fill: "F5F7F9" },
               width: { size: 40, type: WidthType.PERCENTAGE },
+              verticalAlign: VerticalAlign.CENTER,
             }),
             new TableCell({
-              children: [new Paragraph({ children: [new TextRun({ text: "Valor", bold: true, size: 20, font: "Calibri" })] })],
-              shading: { type: ShadingType.SOLID, color: "E8EDF2", fill: "E8EDF2" },
-              width: { size: 40, type: WidthType.PERCENTAGE },
-            }),
-            new TableCell({
-              children: [new Paragraph({ children: [new TextRun({ text: "Estado", bold: true, size: 20, font: "Calibri" })] })],
-              shading: { type: ShadingType.SOLID, color: "E8EDF2", fill: "E8EDF2" },
-              width: { size: 20, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ children: [new TextRun({ text: "VALOR / DETALLE", bold: true, size: 18, font: "Arial", color: "444444" })] })],
+              shading: { type: ShadingType.SOLID, color: "F5F7F9", fill: "F5F7F9" },
+              width: { size: 60, type: WidthType.PERCENTAGE },
+              verticalAlign: VerticalAlign.CENTER,
             }),
           ],
         }),
@@ -150,6 +223,8 @@ export async function GET(
 
       for (const field of areaFields) {
         const hasValue = field.value && field.value.trim() !== "";
+        const displayValue = hasValue ? formatCurrency(field.value, field.label) : "(Sin diligenciar)";
+        
         tableRows.push(
           new TableRow({
             children: [
@@ -159,44 +234,34 @@ export async function GET(
                     children: [
                       new TextRun({
                         text: field.label,
-                        size: 20,
-                        font: "Calibri",
+                        size: 18,
+                        font: "Arial",
                         bold: field.required,
+                        color: "333333",
                       }),
-                      field.required ? new TextRun({ text: " *", color: "CC0000", size: 20, font: "Calibri" }) : undefined,
-                    ].filter(Boolean),
+                      field.required ? new TextRun({ text: " *", color: "CC0000", size: 18, font: "Arial" }) : undefined,
+                    ].filter(Boolean) as TextRun[],
                   }),
                 ],
+                verticalAlign: VerticalAlign.CENTER,
+                margins: { top: 100, bottom: 100, left: 100 },
               }),
               new TableCell({
                 children: [
                   new Paragraph({
                     children: [
                       new TextRun({
-                        text: hasValue ? field.value : "(Sin diligenciar)",
-                        size: 20,
-                        font: "Calibri",
+                        text: displayValue,
+                        size: 18,
+                        font: "Arial",
                         color: hasValue ? "000000" : "999999",
                         italics: !hasValue,
                       }),
                     ],
                   }),
                 ],
-              }),
-              new TableCell({
-                children: [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: hasValue ? "Diligenciado" : "Pendiente",
-                        size: 18,
-                        font: "Calibri",
-                        color: hasValue ? "006600" : "CC6600",
-                        bold: true,
-                      }),
-                    ],
-                  }),
-                ],
+                verticalAlign: VerticalAlign.CENTER,
+                margins: { top: 100, bottom: 100, left: 100 },
               }),
             ],
           })
@@ -207,55 +272,58 @@ export async function GET(
         new Table({
           rows: tableRows,
           width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: {
+            insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "EEEEEE" },
+            insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "EEEEEE" },
+            top: { style: BorderStyle.SINGLE, size: 4, color: "1E3A5F" },
+            bottom: { style: BorderStyle.SINGLE, size: 4, color: "1E3A5F" },
+            left: { style: BorderStyle.SINGLE, size: 4, color: "1E3A5F" },
+            right: { style: BorderStyle.SINGLE, size: 4, color: "1E3A5F" },
+          }
         })
       );
 
       children.push(new Paragraph({ children: [new TextRun({ text: "" })], spacing: { after: 200 } }));
     }
 
-    if (workflow.areaLogs.length > 0) {
-      children.push(
+    // Footer content
+    const footer = new Footer({
+      children: [
         new Paragraph({
+          alignment: AlignmentType.CENTER,
           children: [
             new TextRun({
-              text: "HISTORIAL DE FLUJO",
-              bold: true,
-              size: 26,
-              color: "FFFFFF",
-              font: "Calibri",
+              text: "Glory Global Solutions (Colombia) - Documento generado automáticamente",
+              size: 16,
+              font: "Arial",
+              color: "888888",
             }),
           ],
-          heading: HeadingLevel.HEADING_1,
-          shading: { type: ShadingType.SOLID, color: "2C5F8A", fill: "2C5F8A" },
-          spacing: { before: 300, after: 200 },
-        })
-      );
-
-      for (const log of workflow.areaLogs) {
-        const fromLabel = AREA_LABEL_MAP[log.fromArea] || log.fromArea;
-        const toLabel = AREA_LABEL_MAP[log.toArea] || log.toArea;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `[${new Date(log.createdAt).toLocaleString("es-CO")}] ${fromLabel} -> ${toLabel}`,
-                size: 20,
-                font: "Calibri",
-                color: "444444",
-              }),
-            ],
-            spacing: { after: 80 },
-          })
-        );
-      }
-    }
+        }),
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new TextRun({ text: "Página ", size: 16, font: "Arial", color: "888888" }),
+            new TextRun({ children: [PageNumber.CURRENT], size: 16, font: "Arial", color: "888888" }),
+            new TextRun({ text: " de ", size: 16, font: "Arial", color: "888888" }),
+            new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, font: "Arial", color: "888888" }),
+          ],
+        }),
+      ],
+    });
 
     const doc = new Document({
-      sections: [{ children }],
+      sections: [
+        {
+          headers: { default: header },
+          footers: { default: footer },
+          children,
+        },
+      ],
     });
 
     const buffer = await Packer.toBuffer(doc);
-    const fileName = `${workflow.name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, "_")}_completado.docx`;
+    const fileName = `Cotizacion_${workflow.name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, "_")}.docx`;
 
     return new NextResponse(buffer, {
       headers: {
