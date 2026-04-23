@@ -262,7 +262,6 @@ export async function GET(
                         color: hasValue ? "000000" : "999999",
                         italics: !hasValue,
                       }),
-                      }),
                       i < arr.length - 1 ? new TextRun({ break: 1 }) : undefined,
                     ]).filter((run): run is TextRun => run !== undefined),
                   }),
