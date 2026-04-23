@@ -470,7 +470,10 @@ export function WorkflowDetail() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")} className="rounded-full border-border bg-background text-foreground hover:bg-accent">
-              <Download className="mr-1 h-3.5 w-3.5" /><span className="hidden sm:inline">Descargar</span>
+              <Download className="mr-1 h-3.5 w-3.5" /><span className="hidden sm:inline">Interno</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.open(`/api/workflows/${workflow.id}/download/client`, "_blank")} className="rounded-full border-[#007AFF] bg-[#007AFF]/5 text-[#007AFF] hover:bg-[#007AFF]/10">
+              <FileText className="mr-1 h-3.5 w-3.5" /><span className="hidden sm:inline">Cotización</span>
             </Button>
             {canEdit && (
               <Button size="sm" onClick={handleSave} disabled={saving} className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066E0] shadow-sm shadow-[#007AFF]/20">
@@ -710,7 +713,10 @@ export function WorkflowDetail() {
               <CardContent className="p-4 space-y-2">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Acciones</h3>
                 <Button variant="outline" className="w-full rounded-xl border-border bg-card justify-start text-foreground hover:bg-accent" onClick={() => window.open(`/api/workflows/${workflow.id}/download`, "_blank")}>
-                  <Download className="mr-2 h-4 w-4" />Descargar Word
+                  <Download className="mr-2 h-4 w-4" />Reporte Interno (Word)
+                </Button>
+                <Button variant="outline" className="w-full rounded-xl border-[#007AFF]/20 bg-[#007AFF]/5 justify-start text-[#007AFF] hover:bg-[#007AFF]/10" onClick={() => window.open(`/api/workflows/${workflow.id}/download/client`, "_blank")}>
+                  <FileText className="mr-2 h-4 w-4" />Cotización Cliente (Word)
                 </Button>
                 {canEdit && (
                   <Button variant="outline" disabled={savingTemplate} className="w-full rounded-xl border-border bg-card justify-start text-foreground hover:bg-accent" onClick={handleSaveAsTemplate}>

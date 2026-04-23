@@ -87,7 +87,7 @@ export function UploadZone() {
           <Upload className="mr-1.5 h-4 w-4" />Subir Word
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-xl rounded-2xl border-black/5">
+      <DialogContent className="max-w-xl rounded-2xl border-border">
         <DialogHeader>
           <DialogTitle className="text-lg text-foreground">
              Crear flujo desde Word
@@ -111,7 +111,7 @@ export function UploadZone() {
               <Button
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading}
-                className="w-full h-12 bg-[#007AFF] text-white hover:bg-[#0066E0] rounded-xl"
+                className="w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-xl"
               >
                 {uploading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -167,7 +167,7 @@ export function UploadZone() {
              <Button
                 onClick={confirmWorkflow}
                 disabled={uploading || (saveAsTemplate && !templateName)}
-                className="w-full h-11 bg-[#1D1D1F] text-white hover:bg-black rounded-xl"
+                className="w-full h-11 bg-primary text-white hover:bg-primary/90 rounded-xl"
              >
                 {uploading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

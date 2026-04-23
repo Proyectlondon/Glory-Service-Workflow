@@ -151,7 +151,7 @@ export function LandingPage() {
       </section>
 
       {/* Hub & Spoke Visual */}
-      <section className="border-y border-black/5 bg-white">
+      <section className="border-y border-border bg-card">
         <div className="mx-auto max-w-5xl px-6 py-24">
           <motion.div
             initial={{ opacity: 0 }}
@@ -205,12 +205,12 @@ export function LandingPage() {
                     >
                       <div className="flex flex-col items-center gap-1">
                         <div
-                          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-md ring-1 ring-black/5"
+                          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card shadow-md ring-1 ring-border"
                           style={{ boxShadow: `0 4px 12px ${dep.color}20` }}
                         >
                           <Icon className="h-5 w-5" style={{ color: dep.color }} />
                         </div>
-                        <span className="text-[10px] font-medium text-[#86868B] text-center leading-tight w-20">
+                        <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight w-20">
                           {dep.label}
                         </span>
                       </div>
@@ -263,7 +263,7 @@ export function LandingPage() {
             <div className="flex items-center gap-1">
               <ArrowRight className="h-3.5 w-3.5 text-[#34C759]" />
             </div>
-            <span className="text-xs text-[#86868B]">Escala</span>
+            <span className="text-xs text-muted-foreground">Escala</span>
             <div className="flex items-center gap-1">
               <ArrowRight className="h-3.5 w-3.5 text-[#34C759]" />
             </div>
@@ -271,7 +271,7 @@ export function LandingPage() {
             <div className="flex items-center gap-1">
               <RotateCcw className="h-3.5 w-3.5 text-[#FF9500]" />
             </div>
-            <span className="text-xs text-[#86868B]">Devuelve</span>
+            <span className="text-xs text-muted-foreground">Devuelve</span>
             <div className="flex items-center gap-1">
               <ArrowRight className="h-3.5 w-3.5 text-[#FF9500]" />
             </div>
@@ -287,7 +287,7 @@ export function LandingPage() {
       <section className="mx-auto max-w-5xl px-6 py-24">
         <div className="mb-16 text-center">
           <p className="text-sm font-medium uppercase tracking-wider text-[#007AFF]">Características</p>
-          <h2 className="mt-2 text-4xl font-bold tracking-tight text-[#1D1D1F]">
+          <h2 className="mt-2 text-4xl font-bold tracking-tight text-foreground">
             Todo lo que necesitas.
           </h2>
         </div>
@@ -311,13 +311,13 @@ export function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
+            className="rounded-3xl bg-card p-8 ring-1 ring-border transition-all hover:shadow-lg"
           >
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FF9500]/10">
               <Zap className="h-5 w-5 text-[#FF9500]" />
             </div>
-            <h3 className="text-lg font-semibold text-[#1D1D1F]">Escalamiento inteligente</h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+            <h3 className="text-lg font-semibold text-foreground">Escalamiento inteligente</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               La Ejecutiva escala a cualquier dependencia con un clic. Las dependencias devuelven automáticamente la información y ella continúa.
             </p>
           </motion.div>
@@ -326,13 +326,13 @@ export function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
+            className="rounded-3xl bg-card p-8 ring-1 ring-border transition-all hover:shadow-lg"
           >
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#34C759]/10">
               <Bell className="h-5 w-5 text-[#34C759]" />
             </div>
-            <h3 className="text-lg font-semibold text-[#1D1D1F]">Notificaciones en tiempo real</h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+            <h3 className="text-lg font-semibold text-foreground">Notificaciones en tiempo real</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Alertas automáticas al escalar, recibir respuesta y completar. Nunca pierdes el rastro de ningún formato.
             </p>
           </motion.div>
@@ -341,13 +341,13 @@ export function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="rounded-3xl bg-white p-8 ring-1 ring-black/5 transition-all hover:shadow-lg"
+            className="rounded-3xl bg-card p-8 ring-1 ring-border transition-all hover:shadow-lg"
           >
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#AF52DE]/10">
               <FileText className="h-5 w-5 text-[#AF52DE]" />
             </div>
-            <h3 className="text-lg font-semibold text-[#1D1D1F]">Word nativo</h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#86868B]">
+            <h3 className="text-lg font-semibold text-foreground">Word nativo</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Sube formatos .docx y descarga documentos profesionales completamente diligenciados con tablas por área y estado de cada campo.
             </p>
           </motion.div>
@@ -371,7 +371,7 @@ export function LandingPage() {
           <Button
             size="lg"
             onClick={() => setCurrentView("dashboard")}
-            className="mt-8 rounded-full bg-white px-8 py-6 text-base font-medium text-[#007AFF] shadow-lg hover:bg-white/90"
+            className="mt-8 rounded-full bg-card px-8 py-6 text-base font-medium text-[#007AFF] shadow-lg hover:bg-card/90"
           >
             Comenzar Gratis
             <ChevronRight className="ml-1 h-5 w-5" />
@@ -380,16 +380,16 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-black/5 bg-white">
+      <footer className="border-t border-border bg-card">
         <div className="mx-auto max-w-5xl px-6 py-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-[#007AFF] to-[#0055D4]">
                 <FileText className="h-3.5 w-3.5 text-white" />
               </div>
-              <span className="text-sm font-medium text-[#1D1D1F]">Glory Service Workflow</span>
+              <span className="text-sm font-medium text-foreground">Glory Service Workflow</span>
             </div>
-            <p className="text-xs text-[#86868B]">MVP de productividad empresarial &copy; {new Date().getFullYear()}</p>
+            <p className="text-xs text-muted-foreground">MVP de productividad empresarial &copy; {new Date().getFullYear()}</p>
           </div>
         </div>
       </footer>

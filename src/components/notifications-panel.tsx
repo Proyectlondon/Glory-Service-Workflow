@@ -67,7 +67,7 @@ export function NotificationsPanel() {
       case "area_change": return <ArrowRight className="h-4 w-4 text-[#007AFF]" />;
       case "complete": return <CheckCircle2 className="h-4 w-4 text-[#34C759]" />;
       case "save": return <Download className="h-4 w-4 text-[#34C759]" />;
-      default: return <Info className="h-4 w-4 text-[#86868B]" />;
+      default: return <Info className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -120,9 +120,9 @@ export function NotificationsPanel() {
         )}
 
         <div className="mb-4 flex gap-1">
-          <div className="flex rounded-xl border border-black/5 bg-white p-1">
+          <div className="flex rounded-xl border border-border bg-card p-1">
             {(["all", "unread"] as const).map((f) => (
-              <button key={f} onClick={() => setFilter(f)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${filter === f ? "bg-[#007AFF] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+              <button key={f} onClick={() => setFilter(f)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${filter === f ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
                 {f === "all" ? "Todas" : "No leídas"}
               </button>
             ))}
@@ -132,7 +132,7 @@ export function NotificationsPanel() {
         <div className="space-y-2">
           <AnimatePresence>
             {filtered.length === 0 ? (
-              <Card className="rounded-2xl border-black/5 bg-white shadow-sm">
+              <Card className="rounded-2xl border-border bg-card shadow-sm">
                 <CardContent className="flex flex-col items-center py-20 text-center">
                   <Bell className="mb-4 h-12 w-12 text-[#C7C7CC]" />
                   <h3 className="text-lg font-semibold text-foreground">Sin notificaciones</h3>
@@ -149,13 +149,13 @@ export function NotificationsPanel() {
                       onClick={() => { openWorkflow(n.workflowId); handleMarkSingleRead(n.id); }}
                     >
                       <CardContent className="flex items-start gap-3 p-4">
-                        <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#F5F5F7]">{getIcon(n.type)}</div>
+                        <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">{getIcon(n.type)}</div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm leading-relaxed ${!n.read ? "font-semibold text-[#1D1D1F]" : "font-medium text-[#3A3A3C]"}`}>{n.message}</p>
+                          <p className={`text-sm leading-relaxed ${!n.read ? "font-semibold text-foreground" : "font-medium text-foreground/70"}`}>{n.message}</p>
                           <div className="mt-1 flex items-center gap-2">
-                            <Clock className="h-3 w-3 text-[#C7C7CC]" />
-                            <span className="text-[11px] text-[#86868B]">{formatTime(n.createdAt)}</span>
-                            {n.workflow && <Badge className="rounded-full bg-[#F5F5F7] text-[#86868B] text-[10px] px-1.5">{n.workflow.name}</Badge>}
+                            <Clock className="h-3 w-3 text-foreground/40" />
+                            <span className="text-[11px] text-foreground/50">{formatTime(n.createdAt)}</span>
+                            {n.workflow && <Badge className="rounded-full bg-muted text-muted-foreground text-[10px] px-1.5">{n.workflow.name}</Badge>}
                             {relevant && user?.role !== "admin" && (
                               <Badge className="rounded-full bg-[#FF9500]/10 text-[#FF9500] text-[10px] px-1.5">Tu área</Badge>
                             )}

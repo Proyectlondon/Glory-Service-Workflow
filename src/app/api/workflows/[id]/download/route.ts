@@ -66,7 +66,7 @@ export async function GET(
       return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
     }
 
-    const areas = ["DISPATCHER", "EXECUTIVE_ACCOUNTANT", "FINANCE", "OPERATIONS", "LEGAL", "IT", "SUPPLY_CHAIN", "SERVICE_SUPPORT"];
+    const areas = ["DISPATCHER", "EXECUTIVE_ACCOUNTANT", "FINANCE", "OPERATIONS", "SUPPLY_CHAIN", "SERVICE_SUPPORT"];
     const fieldsByArea = new Map<string, typeof workflow.fields>();
     for (const field of workflow.fields) {
       if (!fieldsByArea.has(field.area)) fieldsByArea.set(field.area, []);

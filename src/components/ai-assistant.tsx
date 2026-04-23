@@ -116,7 +116,7 @@ export function AIAssistant({ workflow, onApplyField, activeArea }: AIAssistantP
             {/* Header */}
             <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-700 px-5 py-4 text-white">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white overflow-hidden p-1">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/90 overflow-hidden p-1">
                   <img src="/corporate-logo.png" alt="Logo" className="h-full object-contain" />
                 </div>
                 <div>
@@ -158,14 +158,14 @@ export function AIAssistant({ workflow, onApplyField, activeArea }: AIAssistantP
                       <div className="flex gap-2 px-1">
                         <button 
                           onClick={() => copyToClipboard(msg.content, i)}
-                          className="text-[10px] text-slate-400 hover:text-blue-500 flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground hover:text-blue-500 flex items-center gap-1"
                         >
                           {copiedIndex === i ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                           {copiedIndex === i ? "Copiado" : "Copiar"}
                         </button>
                         <button 
                           onClick={() => detectAndApplyFields(msg.content)}
-                          className="text-[10px] text-slate-400 hover:text-indigo-500 flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground hover:text-indigo-500 flex items-center gap-1"
                         >
                           <CornerDownLeft className="h-3 w-3" />
                           Aplicar campos
@@ -176,10 +176,10 @@ export function AIAssistant({ workflow, onApplyField, activeArea }: AIAssistantP
                 ))}
                 {isLoading && (
                   <div className="flex items-center gap-2 text-slate-400">
-                    <div className="flex h-6 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800">
-                      <div className="h-1 w-1 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]"></div>
-                      <div className="mx-1 h-1 w-1 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]"></div>
-                      <div className="h-1 w-1 animate-bounce rounded-full bg-slate-400"></div>
+                    <div className="flex h-6 w-10 items-center justify-center rounded-2xl bg-muted">
+                      <div className="h-1 w-1 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]"></div>
+                      <div className="mx-1 h-1 w-1 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]"></div>
+                      <div className="h-1 w-1 animate-bounce rounded-full bg-muted-foreground"></div>
                     </div>
                   </div>
                 )}
@@ -187,14 +187,14 @@ export function AIAssistant({ workflow, onApplyField, activeArea }: AIAssistantP
             </ScrollArea>
 
             {/* Input Area */}
-            <div className="border-t border-slate-100 p-4 dark:border-slate-800">
+            <div className="border-t border-border p-4">
               <div className="flex gap-2">
                 <Input 
                   placeholder="Pregunta a Nebula..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  className="rounded-xl border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
+                  className="rounded-xl border-border bg-muted"
                 />
                 <Button 
                   size="icon" 
@@ -205,7 +205,7 @@ export function AIAssistant({ workflow, onApplyField, activeArea }: AIAssistantP
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="mt-2 text-center text-[9px] text-slate-400">
+              <p className="mt-2 text-center text-[9px] text-muted-foreground">
                 Impulsado por Gemma Local via Ollama
               </p>
             </div>
@@ -221,7 +221,7 @@ export function AIAssistant({ workflow, onApplyField, activeArea }: AIAssistantP
         className={cn(
           "flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all",
           isOpen 
-            ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400" 
+            ? "bg-muted text-foreground" 
             : "bg-gradient-to-br from-blue-500 to-indigo-700 text-white ring-4 ring-blue-500/20"
         )}
       >

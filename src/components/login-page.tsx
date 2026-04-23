@@ -96,21 +96,21 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           </div>
 
           {/* Login Card */}
-          <Card className="rounded-2xl border border-black/5 dark:border-white/10 bg-card shadow-sm">
+          <Card className="rounded-2xl border-border bg-card shadow-sm">
             <CardContent className="p-6 space-y-4">
               <div>
                 <label className="text-sm font-medium text-foreground">
                   Usuario o Correo
                 </label>
                 <div className="relative mt-1.5">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C7C7CC]" />
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
                   <Input
                     type="text"
                     placeholder="ej: correo@glory.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="h-11 rounded-xl border-black/10 dark:border-white/10 bg-muted pl-10 text-sm placeholder:text-[#C7C7CC]"
+                    className="h-11 rounded-xl border-border bg-muted pl-10 text-sm placeholder:text-muted-foreground/50"
                     autoComplete="username"
                   />
                 </div>
@@ -121,20 +121,20 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   Contraseña
                 </label>
                 <div className="relative mt-1.5">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C7C7CC]" />
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className="h-11 rounded-xl border-black/10 dark:border-white/10 bg-muted pl-10 pr-10 text-sm placeholder:text-[#C7C7CC]"
+                    className="h-11 rounded-xl border-border bg-muted pl-10 pr-10 text-sm placeholder:text-muted-foreground/50"
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#C7C7CC] hover:text-[#86868B]"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -148,7 +148,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <Button
                 onClick={() => handleLogin()}
                 disabled={loading || !email || !password}
-                className="w-full h-11 rounded-xl bg-[#007AFF] text-white text-sm font-medium shadow-sm shadow-[#007AFF]/20 hover:bg-[#0066E0] disabled:opacity-50"
+                className="w-full h-11 rounded-xl bg-primary text-primary-foreground text-sm font-medium shadow-sm hover:bg-primary/90 disabled:opacity-50"
               >
                 {loading ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

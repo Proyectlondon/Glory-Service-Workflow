@@ -163,7 +163,7 @@ export function UserManagement() {
             variant="ghost" 
             size="icon" 
             onClick={() => setCurrentView("dashboard")}
-            className="rounded-full hover:bg-black/5"
+            className="rounded-full hover:bg-accent"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -189,7 +189,7 @@ export function UserManagement() {
         >
           <DialogTrigger asChild>
             <Button 
-              className="rounded-full bg-[#007AFF] text-white hover:bg-[#0066E0]"
+              className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 setUserToEdit(null);
                 setFormData({ name: "", email: "", password: "", area: "DISPATCHER", role: "user" });
@@ -292,10 +292,10 @@ export function UserManagement() {
       </div>
 
       {/* Search */}
-      <Card className="mb-6 rounded-2xl border-black/5 dark:border-white/10 bg-card shadow-sm">
+      <Card className="mb-6 rounded-2xl border-border bg-card shadow-sm">
         <CardContent className="p-4">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#86868B]" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Buscar usuarios por nombre o correo..." 
               className="pl-10 bg-transparent border-none focus-visible:ring-0 text-base"
@@ -310,7 +310,7 @@ export function UserManagement() {
       <div className="grid gap-4">
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#007AFF] border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
         ) : filteredUsers.length === 0 ? (
           <p className="text-center py-20 text-muted-foreground">No se encontraron usuarios.</p>
@@ -321,7 +321,7 @@ export function UserManagement() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <Card className="rounded-2xl border-black/5 dark:border-white/10 bg-card shadow-sm hover:shadow-md transition-shadow">
+              <Card className="rounded-2xl border-border bg-card shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold text-foreground">
@@ -345,7 +345,7 @@ export function UserManagement() {
                       >
                         {AREA_LABEL_MAP[u?.area || ""] || u?.area || "Sin área"}
                       </Badge>
-                      <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-[#86868B] uppercase tracking-wider font-semibold">
+                      <div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
                         {u.role === "admin" && (
                           <span className="flex items-center gap-1 text-[#5856D6]">
                             <Shield className="h-3 w-3" />
@@ -359,7 +359,7 @@ export function UserManagement() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="text-[#007AFF] hover:bg-[#007AFF]/5 rounded-full"
+                      className="text-primary hover:bg-primary/10 rounded-full"
                       onClick={() => handleEditClick(u)}
                     >
                       <Pencil className="h-4 w-4" />
@@ -368,7 +368,7 @@ export function UserManagement() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="text-[#FF3B30] hover:bg-[#FF3B30]/5 rounded-full"
+                      className="text-destructive hover:bg-destructive/10 rounded-full"
                       onClick={() => setUserToDelete({ id: u.id, name: u.name })}
                     >
                       <Trash2 className="h-4 w-4" />

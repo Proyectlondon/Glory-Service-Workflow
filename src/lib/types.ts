@@ -32,22 +32,6 @@ export const AREAS = [
     type: "dependency" as const,
   },
   {
-    id: "LEGAL",
-    label: "Jurídica",
-    icon: "Shield",
-    color: "#AF52DE",
-    description: "Verifica aspectos legales, contractuales y de cumplimiento",
-    type: "dependency" as const,
-  },
-  {
-    id: "IT",
-    label: "Tecnología",
-    icon: "Cpu",
-    color: "#5AC8FA",
-    description: "Proporciona información técnica y de sistemas",
-    type: "dependency" as const,
-  },
-  {
     id: "SUPPLY_CHAIN",
     label: "Cadena de Suministro",
     icon: "Package",
