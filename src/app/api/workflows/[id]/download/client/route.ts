@@ -18,24 +18,9 @@ import {
 } from "docx";
 import { CORPORATE_LOGO_BASE64 } from "@/lib/logo_base64";
 
-const formatCurrency = (value: string) => {
-  if (!value || value.trim() === "" || value === "(Sin diligenciar)") return "$ 0";
+import { formatCOP, normalizeLabel } from "@/lib/formatters";
 
-  const cleanValue = value.toString().replace(/[^\d.,]/g, "").replace(",", ".");
-  const numericValue = parseFloat(cleanValue);
-
-  if (isNaN(numericValue)) return value;
-
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-    .format(numericValue)
-    .replace("COP", "$")
-    .trim();
-};
+const formatCurrency = (value: string) => formatCOP(value);
 
 const getNumericValue = (value: string): number => {
   if (!value) return 0;
@@ -60,8 +45,13 @@ export async function GET(
     }
 
     // Heuristic field extraction
-    const findField = (keywords: string[]) => 
-      workflow.fields.find(f => keywords.some(k => f.label.toLowerCase().includes(k.toLowerCase())))?.value || "";
+    const findField = (keywords: string[]) => {
+      const normalizedKeywords = keywords.map(k => normalizeLabel(k));
+      return workflow.fields.find(f => {
+        const label = normalizeLabel(f.label);
+        return normalizedKeywords.some(k => label.includes(k));
+      })?.value || "";
+    };
 
     const clientName = findField(["cliente", "señores", "solicitado por"]) || "Cliente";
     const model = findField(["modelo", "equipo", "maquina"]) || "G-220";
@@ -72,12 +62,13 @@ export async function GET(
     // Table mapping: identify fields that represent items
     // Heuristic: items in OPERATIONS or FINANCE that have a label starting with "PBA", "ASM", "Mano de obra", "Desplazamiento"
     // or any field that has a value and is likely a line item.
-    const itemKeywords = ["pba", "asm", "mano de obra", "desplazamiento", "repuesto", "servicio", "viaticos"];
-    const items = workflow.fields.filter(f => 
-      (f.area === "OPERATIONS" || f.area === "FINANCE") && 
-      (itemKeywords.some(k => f.label.toLowerCase().includes(k)) || f.label.includes(",")) &&
-      f.value && f.value !== "(Sin diligenciar)" && getNumericValue(f.value) > 0
-    );
+    const itemKeywords = ["pba", "asm", "mano de obra", "desplazamiento", "repuesto", "servicio", "viaticos", "mantenimiento", "reparacion"];
+    const items = workflow.fields.filter(f => {
+      const label = normalizeLabel(f.label);
+      const isItem = itemKeywords.some(k => label.includes(k)) || f.label.includes(",");
+      const hasNumericValue = f.value && f.value !== "(Sin diligenciar)" && getNumericValue(f.value) > 0;
+      return (f.area === "OPERATIONS" || f.area === "FINANCE" || f.area === "EXECUTIVE_ACCOUNTANT") && isItem && hasNumericValue;
+    });
 
     const children: (Paragraph | Table)[] = [];
 

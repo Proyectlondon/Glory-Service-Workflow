@@ -22,33 +22,7 @@ import {
 } from "docx";
 import { CORPORATE_LOGO_BASE64 } from "@/lib/logo_base64";
 
-const formatCurrency = (value: string, label: string) => {
-  if (!label) return value;
-  const currencyKeywords = [
-    "costo", "precio", "valor", "total", "iva", "subtotal", "monto", 
-    "pago", "presupuesto", "tarifa", "cuota", "honorarios"
-  ];
-  const normalizedLabel = label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const isCurrency = currencyKeywords.some((keyword) => normalizedLabel.includes(keyword));
-
-  if (!isCurrency || !value || value.trim() === "" || value === "(Sin diligenciar)") return value;
-
-  // Limpiar el valor de caracteres no numéricos
-  const cleanValue = value.toString().replace(/[^\d.,]/g, "").replace(",", ".");
-  const numericValue = parseFloat(cleanValue);
-
-  if (isNaN(numericValue)) return value;
-
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-    .format(numericValue)
-    .replace("COP", "$")
-    .trim();
-};
+import { formatFieldValue } from "@/lib/formatters";
 
 export async function GET(
   _request: NextRequest,
@@ -228,7 +202,7 @@ export async function GET(
 
       for (const field of areaFields) {
         const hasValue = field.value && field.value.trim() !== "";
-        const displayValue = hasValue ? formatCurrency(field.value, field.label) : "(Sin diligenciar)";
+        const displayValue = formatFieldValue(field.value, field.label);
         
         tableRows.push(
           new TableRow({

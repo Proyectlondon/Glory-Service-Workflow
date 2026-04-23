@@ -62,6 +62,7 @@ import {
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { AIAssistant } from "./ai-assistant";
+import { isCurrencyLabel, formatCOP } from "@/lib/formatters";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Mail, UserCheck, DollarSign, Settings, Shield, Cpu, Package, Headphones,
@@ -204,36 +205,9 @@ function getAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" };
 }
 
-const isCurrencyField = (label: string) => {
-  if (!label) return false;
-  const currencyKeywords = [
-    "costo", "precio", "valor", "total", "iva", "subtotal", "monto", 
-    "pago", "presupuesto", "tarifa", "cuota", "honorarios"
-  ];
-  // Normalizar para quitar tildes y caracteres especiales
-  const normalizedLabel = label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  return currencyKeywords.some((keyword) => normalizedLabel.includes(keyword));
-};
+const isCurrencyField = (label: string) => isCurrencyLabel(label);
 
-const formatCurrencyUI = (val: string) => {
-  if (!val || val === "(Sin diligenciar)") return "";
-  
-  // Extraer solo números y punto decimal
-  const cleanValue = val.toString().replace(/[^\d.,]/g, "").replace(",", ".");
-  const numericValue = parseFloat(cleanValue);
-  
-  if (isNaN(numericValue)) return val;
-  
-  return new Intl.NumberFormat("es-CO", {
-    style: "currency",
-    currency: "COP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0, // Generalmente COP no usa decimales, pero el formateador los manejará si se requiere
-  })
-    .format(numericValue)
-    .replace("COP", "$")
-    .trim();
-};
+const formatCurrencyUI = (val: string) => formatCOP(val);
 
 export function WorkflowDetail() {
   const { selectedWorkflowId, setCurrentView, updateWorkflowInList, isLoading, setIsLoading, user } = useAppStore();
