@@ -7,8 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AREA_LABEL_MAP } from "@/lib/types";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AREAS } from "@/lib/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function UploadZone() {
   const { setCurrentView, setSelectedWorkflowId, updateWorkflowInList } = useAppStore();
@@ -38,6 +45,13 @@ export function UploadZone() {
       setTemplateName(file.name.replace(".docx", ""));
     } catch (error) { alert("Error al procesar el archivo"); }
     finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
+  };
+  
+  const handleAreaChange = (index: number, newArea: string) => {
+    if (!parsedData) return;
+    const newFields = [...parsedData.fields];
+    newFields[index] = { ...newFields[index], area: newArea };
+    setParsedData({ ...parsedData, fields: newFields });
   };
 
   const confirmWorkflow = async () => {
@@ -128,14 +142,25 @@ export function UploadZone() {
              </div>
              
              {parsedData.fields.length > 0 ? (
-               <div className="max-h-48 overflow-y-auto space-y-2 border rounded-xl p-3 bg-muted border-border">
-                  {parsedData.fields.map((f, i) => (
-                     <div key={i} className="flex items-center justify-between bg-card px-3 py-2 rounded-lg text-sm border border-border">
-                        <span className="font-medium text-foreground">{f.label}</span>
-                        <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">{AREA_LABEL_MAP[f.area] || f.area}</span>
-                     </div>
-                  ))}
-               </div>
+                <div className="max-h-64 overflow-y-auto space-y-2 border rounded-xl p-3 bg-muted border-border">
+                   {parsedData.fields.map((f, i) => (
+                      <div key={i} className="flex items-center justify-between bg-card px-3 py-2 rounded-lg text-sm border border-border">
+                         <span className="font-medium text-foreground truncate mr-4">{f.label}</span>
+                         <Select value={f.area} onValueChange={(val) => handleAreaChange(i, val)}>
+                            <SelectTrigger className="h-8 w-44 text-xs border-transparent bg-muted/50 hover:bg-muted text-muted-foreground transition-all">
+                               <SelectValue placeholder="Asignar Área" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border bg-card shadow-lg">
+                               {AREAS.map((a) => (
+                                  <SelectItem key={a.id} value={a.id} className="text-xs">
+                                     {a.label}
+                                  </SelectItem>
+                               ))}
+                            </SelectContent>
+                         </Select>
+                      </div>
+                   ))}
+                </div>
              ) : (
                <div className="rounded-xl border border-dashed border-border p-6 text-center">
                  <p className="text-sm text-muted-foreground">No se detectaron campos con el formato {"{{Ejemplo}}"}.</p>
