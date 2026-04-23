@@ -15,7 +15,6 @@ import {
   Header,
   Footer,
   VerticalAlign,
-  TextBreak,
 } from "docx";
 import { CORPORATE_LOGO_BASE64 } from "@/lib/logo_base64";
 
