@@ -552,8 +552,6 @@ function ManualCreateForm({ onCreate }: { onCreate: (name: string, fields: any[]
     { label: "Datos de Facturación", value: "", fieldType: "textarea", area: "FINANCE", required: false },
     { label: "Requisitos Operativos", value: "", fieldType: "textarea", area: "OPERATIONS", required: false },
     { label: "Fecha de Entrega", value: "", fieldType: "date", area: "OPERATIONS", required: false },
-    { label: "Revisión Legal", value: "", fieldType: "textarea", area: "LEGAL", required: false },
-    { label: "Recursos Técnicos", value: "", fieldType: "textarea", area: "IT", required: false },
     { label: "Proveedor Asignado", value: "", fieldType: "text", area: "SUPPLY_CHAIN", required: false },
     { label: "Observaciones de Soporte", value: "", fieldType: "textarea", area: "SERVICE_SUPPORT", required: false },
   ];

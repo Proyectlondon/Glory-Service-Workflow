@@ -9,8 +9,6 @@ export async function POST(request: NextRequest) {
       { name: "Ejecutiva", email: "ejecutiva@glory.com", password: "123456", area: "EXECUTIVE_ACCOUNTANT", role: "user" },
       { name: "Financiera", email: "financiera@glory.com", password: "123456", area: "FINANCE", role: "user" },
       { name: "Operaciones", email: "operaciones@glory.com", password: "123456", area: "OPERATIONS", role: "user" },
-      { name: "Juridica", email: "juridica@glory.com", password: "123456", area: "LEGAL", role: "user" },
-      { name: "Tecnologia", email: "tecnologia@glory.com", password: "123456", area: "IT", role: "user" },
       { name: "Cadena de Suministro", email: "cadena@glory.com", password: "123456", area: "SUPPLY_CHAIN", role: "user" },
       { name: "Soporte", email: "soporte@glory.com", password: "123456", area: "SERVICE_SUPPORT", role: "user" },
       { name: "Admin", email: "admin@glory.com", password: "123456", area: "DISPATCHER", role: "admin" },

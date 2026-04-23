@@ -204,8 +204,6 @@ export function TemplateManagement() {
                                         area === "EXECUTIVE_ACCOUNTANT" ? "#5856D6" :
                                         area === "FINANCE" ? "#34C759" :
                                         area === "OPERATIONS" ? "#FF9500" :
-                                        area === "LEGAL" ? "#FF3B30" :
-                                        area === "IT" ? "#AF52DE" :
                                         area === "SUPPLY_CHAIN" ? "#00C7BE" :
                                         "#8E8E93"
                                       }20`,
@@ -214,8 +212,6 @@ export function TemplateManagement() {
                                         area === "EXECUTIVE_ACCOUNTANT" ? "#5856D6" :
                                         area === "FINANCE" ? "#34C759" :
                                         area === "OPERATIONS" ? "#FF9500" :
-                                        area === "LEGAL" ? "#FF3B30" :
-                                        area === "IT" ? "#AF52DE" :
                                         area === "SUPPLY_CHAIN" ? "#00C7BE" :
                                         "#8E8E93",
                                     }}

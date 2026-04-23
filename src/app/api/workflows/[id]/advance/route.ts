@@ -69,7 +69,7 @@ export async function POST(
     }
 
     // Dependencies can only return to Executive Accountant
-    const dependencyIds = ["FINANCE", "OPERATIONS", "LEGAL", "IT", "SUPPLY_CHAIN", "SERVICE_SUPPORT"];
+    const dependencyIds = ["FINANCE", "OPERATIONS", "SUPPLY_CHAIN", "SERVICE_SUPPORT"];
     if (dependencyIds.includes(current) && targetArea !== "EXECUTIVE_ACCOUNTANT") {
       return NextResponse.json(
         { error: "Las dependencias solo pueden devolver a Ejecutiva de Cuenta" },
